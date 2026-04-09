@@ -1,0 +1,6 @@
+BasedOnStyle: LLVM
+# AlignAfterOpenBracket: DontAlign
+AllowShortIfStatementsOnASingleLine: Never
+IndentWidth: 2
+
+ColumnLimit: 999 # i hate random folding

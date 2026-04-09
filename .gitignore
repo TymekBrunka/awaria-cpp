@@ -1,0 +1,11 @@
+Makefile
+compile_commands.json
+build/*
+build_windows/*
+.cache/
+vcpkg_installed/
+
+CMakeCache.txt
+CMakeFiles/
+imgui.ini
+Session.vim
