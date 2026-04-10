@@ -7,8 +7,9 @@ include(deps/ext.cmake)
 add_executable(main src/main.cpp)
 target_link_libraries(main
   raylib
-  SDL2::SDL2-static
+  # SDL2::SDL2-static
   imgui
+  rlimgui
 
   xlsxio_write_STATIC
 )

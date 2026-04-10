@@ -36,7 +36,10 @@ function(add_library target)
   #   message(STATUS "Excluding library target: ${target}")
   #   return()  # Skip creating the target
   # endif()
-  if(target STREQUAL SDL2::SDL2 AND ARGV2 STREQUAL SDL2)
+  if (target STREQUAL "SDL2::SDL2")
+    message("cnsdcnsdkjncdsc>>>>>>> sdl2 : ${ARGV2}")
+  endif()
+  if(target STREQUAL "SDL2::SDL2" AND ARGV2 STREQUAL "SDL2")
     return()  # Skip creating the target
   endif()
   original_add_library(${ARGV})  # Create the target if allowed
@@ -47,27 +50,29 @@ message(sdl2)
 CPMAddPackage(
   NAME SDL2
   VERSION 2.32.64
-  GITHUB_REPOSITORY libsdl-org/sdl2-compat
-  GIT_TAG release-2.32.64
+  GITHUB_REPOSITORY libsdl-org/sdl
+  GIT_TAG "release-2.32.10"
   OPTIONS
-    "SDL2COMPAT_STATIC ON"
     "BUILD_SHARED_LIBS OFF"
     "SDL_STATIC ON"
     "SDL_STATIC_DEFAULT ON"
     "SDL_SHARED OFF"
     "SDL_EXAMPLES OFF"
+    "SDL_RENDER_D3D OFF"
 )
 set(CPM_USE_LOCAL_PACKAGES ON)
 
 set(SDL2_FOUND TRUE CACHE BOOL "" FORCE)
-add_library(SDL2::SDL2 ALIAS SDL2-static)
+if (NOT TARGET SDL2::SDL2)
+  add_library(SDL2::SDL2 ALIAS SDL2-static)
+endif()
 
 #rendering
 message(raylib)
 CPMAddPackage(
   NAME raylib
   GITHUB_REPOSITORY raysan5/raylib
-  GIT_TAG 5.5
+  GIT_TAG "5.5"
   OPTIONS
     "PLATFORM SDL"
     "OPENGL_VERSION 3.3"
