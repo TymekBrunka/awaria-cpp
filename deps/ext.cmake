@@ -4,8 +4,8 @@ set(CPM_USE_LOCAL_PACKAGES ON)
 macro (install)
 endmacro ()
 
-macro (find_package)
-endmacro ()
+# macro (find_package)
+# endmacro ()
 
 find_program(CCACHE_PROGRAM ccache)
 if (CCACHE_PROGRAM)
@@ -65,8 +65,8 @@ endif()
 #   add_library(SDL3::SDL3 ALIAS SDL3-static)
 # endif()
 
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED CONFIG)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE CACHE BOOL "" FORCE)
+# find_package(Threads REQUIRED)
 # message(${CMAKE_THREAD_LIBS_INIT})
 
 #rendering
