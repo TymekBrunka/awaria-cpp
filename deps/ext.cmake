@@ -25,56 +25,58 @@ endif()
 #     "GLM_ENABLE_CXX_20 ON"
 # )
 
-set(CPM_USE_LOCAL_PACKAGES OFF)
+# set(CPM_USE_LOCAL_PACKAGES OFF)
+#
+# function(original_add_library)
+#   _add_library(${ARGV})
+# endfunction()
+#
+# function(add_library target)
+#   # if(target IN_LIST UNWANTED_TARGETS)
+#   #   message(STATUS "Excluding library target: ${target}")
+#   #   return()  # Skip creating the target
+#   # endif()
+#   if (target STREQUAL "SDL3::SDL3")
+#     message("cnsdcnsdkjncdsc>>>>>>> sdl3 : ${ARGV2}")
+#   endif()
+#   if(target STREQUAL "SDL3::SDL3" AND ARGV2 STREQUAL "SDL3")
+#     return()  # Skip creating the target
+#   endif()
+#   original_add_library(${ARGV})  # Create the target if allowed
+# endfunction()
+#
+# #sdl
+# message(sdl3)
+# CPMAddPackage(
+#   NAME SDL3
+#   VERSION 3.2.28
+#   GITHUB_REPOSITORY libsdl-org/sdl
+#   GIT_TAG "release-3.2.28"
+#   OPTIONS
+#     "SDL_STATIC ON"
+#     "SDL_SHARED OFF"
+#     "SDL_EXAMPLES OFF"
+#     # "SDL_RENDER_D3D OFF"
+# )
+# set(CPM_USE_LOCAL_PACKAGES ON)
+#
+# set(SDL3_FOUND TRUE CACHE BOOL "" FORCE)
+# if (NOT TARGET SDL3::SDL3)
+#   add_library(SDL3::SDL3 ALIAS SDL3-static)
+# endif()
 
-function(original_add_library)
-  _add_library(${ARGV})
-endfunction()
-
-function(add_library target)
-  # if(target IN_LIST UNWANTED_TARGETS)
-  #   message(STATUS "Excluding library target: ${target}")
-  #   return()  # Skip creating the target
-  # endif()
-  if (target STREQUAL "SDL2::SDL2")
-    message("cnsdcnsdkjncdsc>>>>>>> sdl2 : ${ARGV2}")
-  endif()
-  if(target STREQUAL "SDL2::SDL2" AND ARGV2 STREQUAL "SDL2")
-    return()  # Skip creating the target
-  endif()
-  original_add_library(${ARGV})  # Create the target if allowed
-endfunction()
-
-#sdl
-message(sdl2)
-CPMAddPackage(
-  NAME SDL2
-  VERSION 2.32.64
-  GITHUB_REPOSITORY libsdl-org/sdl
-  GIT_TAG "release-2.32.10"
-  OPTIONS
-    "BUILD_SHARED_LIBS OFF"
-    "SDL_STATIC ON"
-    "SDL_STATIC_DEFAULT ON"
-    "SDL_SHARED OFF"
-    "SDL_EXAMPLES OFF"
-    "SDL_RENDER_D3D OFF"
-)
-set(CPM_USE_LOCAL_PACKAGES ON)
-
-set(SDL2_FOUND TRUE CACHE BOOL "" FORCE)
-if (NOT TARGET SDL2::SDL2)
-  add_library(SDL2::SDL2 ALIAS SDL2-static)
-endif()
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED CONFIG)
+# message(${CMAKE_THREAD_LIBS_INIT})
 
 #rendering
 message(raylib)
 CPMAddPackage(
   NAME raylib
   GITHUB_REPOSITORY raysan5/raylib
-  GIT_TAG "5.5"
+  GIT_TAG 970531d112fd535c13b45442468dded784b9779e
   OPTIONS
-    "PLATFORM SDL"
+    # "PLATFORM SDL"
     "OPENGL_VERSION 3.3"
     "USE_AUDIO OFF"
     "GLFW_BUILD_WAYLAND ON"
