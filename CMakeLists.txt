@@ -4,12 +4,16 @@ set (CMAKE_CXX_STANDARD 20)
 
 include(deps/ext.cmake)
 
+add_library(assets STATIC src/static.cpp)
+target_include_directories(assets PRIVATE src)
+
 add_executable(main src/main.cpp)
 target_link_libraries(main
   raylib
   # SDL2::SDL2-static
   imgui
   rlimgui
+  assets
 
   xlsxio_write_STATIC
 )

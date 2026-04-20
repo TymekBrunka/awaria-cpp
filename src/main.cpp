@@ -1,17 +1,29 @@
 #include "IconsFontAwesome6.h"
-#include "extras/IconsFontAwesome6.h"
-#include "fa.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "raylib.h"
 #include "rlImGui.h"
+#include "icon.png.hpp"
+#include "rlimgui.h"
 
 char filter_buffer[500] = {0};
 
 int main(void) {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-  SetConfigFlags(FLAG_WINDOW_UNDECORATED);
+  // SetConfigFlags(FLAG_WINDOW_UNDECORATED);
   InitWindow(800, 600, "awaria");
+
+  Image icon = {
+    .data = icon_data.data,
+    .width = icon_data.width,
+    .height = icon_data.height,
+    .mipmaps = 1,
+    .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
+  };
+  SetWindowIcon(icon);
+
+  Texture2D icon_tex = LoadTextureFromImage(icon);
+
   SetTargetFPS(60);
 
   rlImGuiSetup(true);
@@ -24,7 +36,7 @@ int main(void) {
   fontcfg.MergeMode = true;
 
   static const ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
-  ImFont* font1 = io.Fonts->AddFontFromFileTTF("src/Roboto-Regular.ttf", 18);
+  ImFont* font1 = io.Fonts->AddFontFromFileTTF("src/Roboto-Regular.ttf", 17);
   io.Fonts->AddFontFromMemoryCompressedTTF(FA_compressed_data, FA_compressed_size, 16.0f, &fontcfg, icons_ranges);
   // ImFont* icons = io.Fonts->AddFontFromMemoryTTF(iconfont_data, iconfontsize, 16, &fontcfg);
 
@@ -76,6 +88,8 @@ int main(void) {
       ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4);
 
       ImGui::SetCursorPos(ImVec2(3, 3));
+      rlImGuiImageSize(&icon_tex, 20, 20);
+      ImGui::SameLine();
       ImGui::Button(ICON_FA_ARROW_UP_FROM_BRACKET" Otwórz");
       ImGui::SameLine();
       ImGui::Button(ICON_FA_DOWNLOAD" Zapisz");
@@ -94,7 +108,7 @@ int main(void) {
       ImGui::Button(ICON_FA_SQUARE_PLUS" Dodaj", button_size);
       ImGui::SameLine();
       ImGui::Button(ICON_FA_SQUARE_MINUS" Usuń", button_size);
-      ImGui::InputText("##Filtr", filter_buffer, 500);
+      ImGui::InputText("Filtr", filter_buffer, 500);
       ImGui::PopStyleVar(1);
     }
     ImGui::End();
