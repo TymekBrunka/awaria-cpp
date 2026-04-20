@@ -45,21 +45,21 @@ endif()
 #   original_add_library(${ARGV})  # Create the target if allowed
 # endfunction()
 #
-# #sdl
-# message(sdl3)
-# CPMAddPackage(
-#   NAME SDL3
-#   VERSION 3.2.28
-#   GITHUB_REPOSITORY libsdl-org/sdl
-#   GIT_TAG "release-3.2.28"
-#   OPTIONS
-#     "SDL_STATIC ON"
-#     "SDL_SHARED OFF"
-#     "SDL_EXAMPLES OFF"
-#     # "SDL_RENDER_D3D OFF"
-# )
+#sdl
+message(sdl3)
+CPMAddPackage(
+  NAME SDL3
+  VERSION 3.2.28
+  GITHUB_REPOSITORY libsdl-org/sdl
+  GIT_TAG "release-3.2.28"
+  OPTIONS
+    "SDL_STATIC ON"
+    "SDL_SHARED OFF"
+    "SDL_EXAMPLES OFF"
+    # "SDL_RENDER_D3D OFF"
+)
 # set(CPM_USE_LOCAL_PACKAGES ON)
-#
+
 # set(SDL3_FOUND TRUE CACHE BOOL "" FORCE)
 # if (NOT TARGET SDL3::SDL3)
 #   add_library(SDL3::SDL3 ALIAS SDL3-static)

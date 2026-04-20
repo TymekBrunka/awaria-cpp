@@ -4,7 +4,7 @@
 #include "raylib.h"
 #include "rlImGui.h"
 #include "icon.png.hpp"
-#include "rlimgui.h"
+#include "rlImGui.h"
 
 char filter_buffer[500] = {0};
 
