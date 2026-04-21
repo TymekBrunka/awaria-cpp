@@ -103,18 +103,42 @@ int main(void) {
 
       ImVec2 window_padding = ImGui::GetStyle().WindowPadding;
       ImVec2 item_spacing = ImGui::GetStyle().ItemSpacing;
-      ImVec2 button_size = ImVec2(ImGui::GetWindowSize().x * 0.5f - (1 * window_padding.x) - item_spacing.x, 23);
+      ImVec2 button_size = ImVec2(ImGui::GetWindowSize().x * 0.5f - (0.5 * window_padding.x) - item_spacing.x, 23);
 
       ImGui::Button(ICON_FA_SQUARE_PLUS" Dodaj", button_size);
       ImGui::SameLine();
       ImGui::Button(ICON_FA_SQUARE_MINUS" Usuń", button_size);
-      ImGui::InputText("Filtr", filter_buffer, 500);
+
+      ImGui::TextAligned(0.5, ImGui::GetWindowSize().x - (0.5 * window_padding.x), "Wpisy");
+
+      ImGui::BeginChild("Hai");
+      for (int i = 0; i < 2000; i++) {
+        ImGui::PushID(i);
+        ImGui::Button("2026-12-24", ImVec2(ImGui::GetWindowSize().x - (0.5 * window_padding.x) - 45, 23));
+        ImGui::SameLine();
+        ImGui::Button(ICON_FA_TRASH);
+        ImGui::PopID();
+      }
+      ImGui::EndChild();
+
       ImGui::PopStyleVar(1);
     }
     ImGui::End();
 
     ImGui::SetNextWindowClass(&window_class_horizontal);
     if (ImGui::Begin("Content", NULL, ImGuiWindowFlags_NoMove)) {
+      ImVec2 window_padding = ImGui::GetStyle().WindowPadding;
+      ImVec2 item_spacing = ImGui::GetStyle().ItemSpacing;
+      ImVec2 button_size = ImVec2(ImGui::GetWindowSize().x * 0.5f - (0.5 * window_padding.x) - item_spacing.x, 23);
+
+      ImGui::SetNextItemWidth(ImGui::GetWindowSize().x - (2 * window_padding.x));
+      ImGui::InputText("##Filtr", filter_buffer, 500);
+
+      ImGui::SetNextItemWidth(button_size.x);
+      ImGui::InputText("##datetimi_min", filter_buffer, 500);
+      ImGui::SameLine();
+      ImGui::SetNextItemWidth(button_size.x);
+      ImGui::InputText("##datetimi_max", filter_buffer, 500);
     }
     ImGui::End();
     ImGui::PopFont();
