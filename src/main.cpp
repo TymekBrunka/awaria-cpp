@@ -9,14 +9,26 @@
 #include <stdio.h>
 
 char filter_buffer[500] = {0};
-char datetime_min_buffer[18] = {0};
-char datetime_max_buffer[18] = {0};
+char datetime_min_buffer[18 * 2] = {0}; // double size to fit in another detetime string when pasting
+char datetime_max_buffer[18 * 2] = {0}; // double size to fit in another detetime string when pasting
+
+int datetime_min_length = 0;
+int datetime_max_length = 0;
 
 struct StyleDelete {
   const static ImU32 button = 0xFF21218A;
   const static ImU32 text = 0xFF000039;
   const static ImU32 buttonhovered = 0xFF2B2BC6;
   const static ImU32 buttonactive = 0xFF3333E6;
+
+  static void PushStyleVars() {
+    ImGui::PushStyleColor(ImGuiCol_Button, StyleDelete::button);
+    ImGui::PushStyleColor(ImGuiCol_Text, StyleDelete::text);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, StyleDelete::buttonhovered);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, StyleDelete::buttonactive);
+  }
+
+  static void PopStyleColors() { ImGui::PopStyleColor(4); }
 };
 
 // union mychar {
@@ -45,10 +57,10 @@ struct StyleDelete {
 //   return utf8len;
 // }
 
-// tak, to było na tyle dziwne że ściągnąłem tę funkcję z czatu
 static int MaskedInputCallback(ImGuiInputTextCallbackData *data) {
   char digits[13] = {0}; // Tylko cyfry dla formatu 999999999999
   int dCount = 0;
+  int new_len = data->BufTextLen;
 
   // 1. Wyciągnij same cyfry z tego, co jest w buforze
   for (int n = 0; n < data->BufTextLen && dCount < 13; n++) {
@@ -59,15 +71,27 @@ static int MaskedInputCallback(ImGuiInputTextCallbackData *data) {
 
   // 2. Zbuduj sformatowany ciąg: 0000:00:00 00:00
   char formatted[18];
-  snprintf(formatted, 17, "%c%c%c%c:%c%c:%c%c %c%c:%c%c", dCount > 0 ? digits[0] : '0', dCount > 1 ? digits[1] : '0', dCount > 2 ? digits[2] : '0', dCount > 3 ? digits[3] : '0', dCount > 4 ? digits[4] : '0', dCount > 5 ? digits[5] : '0', dCount > 6 ? digits[6] : '0', dCount > 7 ? digits[7] : '0', dCount > 8 ? digits[8] : '0', dCount > 9 ? digits[9] : '0', dCount > 10 ? digits[10] : '0', dCount > 11 ? digits[11] : '0');
+  snprintf(formatted, 17, "%c%c%c%c-%c%c-%c%c %c%c:%c%c", dCount > 0 ? digits[0] : '0', dCount > 1 ? digits[1] : '0', dCount > 2 ? digits[2] : '0', dCount > 3 ? digits[3] : '0', dCount > 4 ? digits[4] : '0', dCount > 5 ? digits[5] : '0', dCount > 6 ? digits[6] : '0', dCount > 7 ? digits[7] : '0', dCount > 8 ? digits[8] : '0', dCount > 9 ? digits[9] : '0', dCount > 10 ? digits[10] : '0', dCount > 11 ? digits[11] : '0');
 
-  // 3. Podmień zawartość bufora bez przesuwania kursora przez ImGui
   int cpos = data->CursorPos;
   data->DeleteChars(0, data->BufTextLen);
   data->InsertChars(0, formatted);
-  data->CursorPos = cpos;
 
-  // Opcjonalnie: utrzymuj kursor na końcu cyfr lub w stałym miejscu
+  int &prev_length = *(int *&)data->UserData;
+  int diff = cpos - prev_length;
+
+  if (diff > 0)
+    for (int i = 0; i < new_len; i++) {
+      if (prev_length + i == 5 || prev_length + i == 7 || prev_length + i == 11 || prev_length + i == 13) {
+        prev_length++;
+        cpos++;
+      }
+    }
+  // else if ((cpos == 5 || cpos == 8 || cpos == 12 || cpos == 14) && diff < 0)
+  //   cpos--;
+
+  data->CursorPos = cpos;
+  prev_length = cpos;
   return 0;
 }
 
@@ -113,8 +137,10 @@ int main(void) {
     rlImGuiBegin();
 
     ImGui::PushFont(font1);
-    ImGui::ShowStyleEditor();
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(0xff222222)); // ABGR
+
+    ImGui::ShowStyleEditor();
+    ImGui::ShowDemoWindow();
 
     ImGuiID dockspace_id = ImGui::GetID("My Dockspace");
     ImGuiViewport *viewport = ImGui::GetMainViewport();
@@ -149,6 +175,7 @@ int main(void) {
     if (ImGui::Begin("Menu", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
       ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 4));
       ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4);
+      ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
       ImGui::PushStyleColor(ImGuiCol_Button, ImU32(0xff222222));
       ImGui::PushStyleColor(ImGuiCol_Text, ImU32(0xffCCCCCC));
 
@@ -158,7 +185,7 @@ int main(void) {
       ImGui::Button(ICON_FA_ARROW_UP_FROM_BRACKET " Otwórz");
       ImGui::SameLine();
       ImGui::Button(ICON_FA_DOWNLOAD " Zapisz");
-      ImGui::PopStyleVar(3);
+      ImGui::PopStyleVar(4);
       ImGui::PopStyleColor(2);
     }
     ImGui::End();
@@ -183,12 +210,9 @@ int main(void) {
         ImGui::Button("2026-12-24", ImVec2(ImGui::GetWindowSize().x - (0.5 * window_padding.x) - 45, 23));
 
         ImGui::SameLine();
-        ImGui::PushStyleColor(ImGuiCol_Button, StyleDelete::button);
-        ImGui::PushStyleColor(ImGuiCol_Text, StyleDelete::text);
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, StyleDelete::buttonhovered);
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, StyleDelete::buttonactive);
+        StyleDelete::PushStyleVars();
         ImGui::Button(ICON_FA_TRASH);
-        ImGui::PopStyleColor(4);
+        StyleDelete::PopStyleColors();
         ImGui::PopID();
       }
       ImGui::EndChild();
@@ -211,13 +235,13 @@ int main(void) {
       ImGui::TextUnformatted("od");
       ImGui::SameLine();
       ImGui::SetNextItemWidth(button_size.x - ImGui::CalcTextSize("od").x);
-      ImGui::InputText("##datetimi_min", datetime_min_buffer, 18, ImGuiInputTextFlags_CallbackEdit, MaskedInputCallback);
+      ImGui::InputText("##datetimi_min", datetime_min_buffer, 18 * 2, ImGuiInputTextFlags_CallbackEdit, MaskedInputCallback, &datetime_min_length);
 
       ImGui::SameLine();
       ImGui::TextUnformatted("do");
       ImGui::SameLine();
       ImGui::SetNextItemWidth(button_size.x - ImGui::CalcTextSize("do").x);
-      ImGui::InputText("##datetimi_max", datetime_max_buffer, 18, ImGuiInputTextFlags_CallbackEdit, MaskedInputCallback);
+      ImGui::InputText("##datetimi_max", datetime_max_buffer, 18 * 2, ImGuiInputTextFlags_CallbackEdit, MaskedInputCallback, &datetime_max_length);
 
       ImGui::BeginChild("Przefiltrowane");
       // ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4);
@@ -236,31 +260,39 @@ int main(void) {
           ImGui::Button(ICON_FA_PEN);
           ImGui::SameLine();
 
-          ImGui::PushStyleColor(ImGuiCol_Button, StyleDelete::button);
-          ImGui::PushStyleColor(ImGuiCol_Text, StyleDelete::text);
-          ImGui::PushStyleColor(ImGuiCol_ButtonHovered, StyleDelete::buttonhovered);
-          ImGui::PushStyleColor(ImGuiCol_ButtonActive, StyleDelete::buttonactive);
+          StyleDelete::PushStyleVars();
           ImGui::Button(ICON_FA_TRASH);
-          ImGui::PopStyleColor(4);
+          StyleDelete::PopStyleColors();
 
-          ImGui::PushStyleColor(ImGuiCol_FrameBg, ImU32(0xff111111));
-          ImGui::BeginTable("tabelka", 2);
+          ImGui::BeginTable("tabelka", 3 /*, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg*/);
+
           ImGui::TableSetupColumn("col1", ImGuiTableColumnFlags_WidthFixed);
+          ImGui::TableSetupColumn("col2", ImGuiTableColumnFlags_WidthFixed);
           ImGui::TableNextRow();
 
           ImGui::TableSetColumnIndex(0);
-          ImGui::TextUnformatted("Sitopiastownik");
+          StyleDelete::PushStyleVars();
+          ImGui::Button(ICON_FA_BOMB);
+          StyleDelete::PopStyleColors();
           ImGui::TableSetColumnIndex(1);
-          ImGui::TextUnformatted("Zamki z piasku");
+          ImGui::SetNextItemWidth(200);
+          ImGui::InputText("##a1", (char *)"Sitopiastownik", 24);
+          ImGui::TableSetColumnIndex(2);
+          ImGui::InputText("##a2", (char *)"Zamki z piasku", 24);
+
           ImGui::TableNextRow();
 
           ImGui::TableSetColumnIndex(0);
-          ImGui::TextUnformatted("Osadnik");
+          StyleDelete::PushStyleVars();
+          ImGui::Button(ICON_FA_BOMB);
+          StyleDelete::PopStyleColors();
           ImGui::TableSetColumnIndex(1);
-          ImGui::TextUnformatted("Osadzanie się");
+          ImGui::SetNextItemWidth(200);
+          ImGui::InputText("##b1", (char *)"Osadnik", 24);
+          ImGui::TableSetColumnIndex(2);
+          ImGui::InputText("##b2", (char *)"Osadzanie się", 24);
 
           ImGui::EndTable();
-          ImGui::PopStyleColor(1);
 
           ImGui::PopID();
         }
