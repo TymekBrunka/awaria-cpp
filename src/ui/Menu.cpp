@@ -97,7 +97,7 @@ static void SDLCALL load_data_callback(void *userdata, const char *const *fileli
     const char *date = yyjson_get_str(date_);
     tm time{};
     std::istringstream ss(date);
-    ss >> std::get_time(&tm, "%Y-%m-%d");
+    ss >> std::get_time(&time, "%Y-%m-%d");
   }
   yyjson_doc_free(doc);
 }

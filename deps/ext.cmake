@@ -25,7 +25,7 @@ endif()
 #     "GLM_ENABLE_CXX_20 ON"
 # )
 
-# set(CPM_USE_LOCAL_PACKAGES OFF)
+set(CPM_USE_LOCAL_PACKAGES OFF)
 #
 # function(original_add_library)
 #   _add_library(${ARGV})
@@ -58,7 +58,7 @@ CPMAddPackage(
     "SDL_EXAMPLES OFF"
     # "SDL_RENDER_D3D OFF"
 )
-# set(CPM_USE_LOCAL_PACKAGES ON)
+set(CPM_USE_LOCAL_PACKAGES ON)
 
 # set(SDL3_FOUND TRUE CACHE BOOL "" FORCE)
 # if (NOT TARGET SDL3::SDL3)
@@ -153,7 +153,7 @@ CPMAddPackage(
   GIT_TAG R_2_7_4
   DOWNLOAD_ONLY
 )
-set(CPM_USE_LOCAL_PACKAGES ON)
+# set(CPM_USE_LOCAL_PACKAGES ON)
 
 set(EXPAT_BUILD_TOOLS OFF)
 set(EXPAT_SHARED_LIBS OFF)
