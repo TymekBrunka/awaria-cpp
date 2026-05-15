@@ -1,5 +1,18 @@
+#include "SDL3/SDL_dialog.h"
 #include <Components_internal.hpp>
+#include <SDL3/SDL.h>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
 #include <rlImGui.h>
+#include <sstream>
+#include <string>
+#include <ctime>
+#include <yyjson.h>
+
+static const SDL_DialogFileFilter ofd_filters[] = {{"harmonogram (json)", "harm.json;json"}, {"Wszystkie pliki", "*"}};
+
+static void SDLCALL load_data_callback(void *userdata, const char *const *filelist, int filter);
 
 void Menu::Ui() {
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -12,13 +25,79 @@ void Menu::Ui() {
     ImGui::PushStyleColor(ImGuiCol_Text, ImU32(0xffCCCCCC));
 
     ImGui::SetCursorPos(ImVec2(3, 3));
-    rlImGuiImageSize((const Texture*)CompGlobals::icon_tex, 20, 20);
+    rlImGuiImageSize((const Texture *)CompGlobals::icon_tex, 20, 20);
     ImGui::SameLine();
-    ImGui::Button(ICON_FA_ARROW_UP_FROM_BRACKET " Otwórz");
+    if (ImGui::Button(ICON_FA_ARROW_UP_FROM_BRACKET " Otwórz")) {
+      SDL_ShowOpenFileDialog(load_data_callback, nullptr, nullptr, ofd_filters, 2, NULL, false);
+    }
     ImGui::SameLine();
     ImGui::Button(ICON_FA_DOWNLOAD " Zapisz");
     ImGui::PopStyleVar(4);
     ImGui::PopStyleColor(2);
   }
   ImGui::End();
+}
+
+std::string readFile(const char *filepath) {
+  if (!std::filesystem::exists(filepath)) {
+    throw std::string("Nie można otworzyć pliku: \"") + filepath + "\"\n";
+  }
+
+  std::ifstream inFile;
+  inFile.open(filepath); // open the input file
+
+  std::stringstream strStream;
+  strStream << inFile.rdbuf();       // read the file
+  std::string str = strStream.str(); // str holds the content of the file
+  return str;
+}
+
+#define assume(x, msg)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                \
+  if (!(x)) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         \
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Błąd wczytywania pliku", (msg), NULL);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            \
+    std::cout << (msg) << "\n";                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       \
+    yyjson_doc_free(doc);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             \
+    return;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           \
+  }
+
+#define iter_obj(obj, iter, key)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      \
+  yyjson_obj_iter iter;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               \
+  yyjson_val *key;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    \
+  yyjson_obj_iter_init(obj, &iter);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   \
+  while ((key = yyjson_obj_iter_next(&iter)))
+
+static void SDLCALL load_data_callback(void *userdata, const char *const *filelist, int filter) {
+  std::lock_guard<std::mutex> guard(CompGlobals::mutex);
+  if (!filelist) {
+    return;
+  } else if (!*filelist) {
+    return;
+  }
+
+  std::string data;
+  try {
+    data = std::move(readFile(*filelist));
+  } catch (std::string &str) {
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Błąd otwarcia pliku", str.c_str(), NULL);
+    return;
+  }
+
+  yyjson_doc *doc = yyjson_read(data.c_str(), data.size(), 0);
+  yyjson_val *root = yyjson_doc_get_root(doc);
+
+  yyjson_val *wersja_formatu = yyjson_obj_get(root, "wersja_formatu");
+  assume(yyjson_is_num(wersja_formatu), "pole wersja_formatu nie jest liczbą");
+  assume((double)yyjson_get_num(wersja_formatu) == 0, "Nieobsługiwana wersja formatu");
+
+  yyjson_val *wpisy = yyjson_obj_get(root, "wpisy");
+  assume(yyjson_is_obj(wpisy), "pole wpisy nie jest objektem");
+
+  iter_obj(wpisy, wpis_, date_) {
+    yyjson_val *wpis = yyjson_obj_iter_get_val(date_);
+    const char *date = yyjson_get_str(date_);
+    tm time{};
+    std::istringstream ss(date);
+    ss >> std::get_time(&tm, "%Y-%m-%d");
+  }
+  yyjson_doc_free(doc);
 }

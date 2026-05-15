@@ -11,3 +11,8 @@ struct StyleDelete {
   static void PopStyleColors();
   static bool Button(const char *label);
 };
+
+struct StyleImportant {
+  const static ImU32 framebg = 0xFF006580;
+  const static ImU32 dimmed_framebg = 0xFF002F3A;
+};

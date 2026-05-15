@@ -29,7 +29,6 @@ struct Shift {
 };
 
 struct Day {
-  tm date;
   Shift shift1;
   Shift shift2;
 };

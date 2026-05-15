@@ -1,6 +1,7 @@
 #include "Components.hpp"
 #include "IconsFontAwesome6.h"
-#include "imgui.h"
+#include "Style.hpp"
+// #include "imgui.h"
 #include <Components_internal.hpp>
 #include <stdio.h>
 
@@ -56,14 +57,14 @@ void MainPanel::MainView() {
     ImVec2 item_spacing = ImGui::GetStyle().ItemSpacing;
     ImVec2 button_size = ImVec2(ImGui::GetWindowSize().x * 0.5f - (0.5 * window_padding.x) - item_spacing.x - item_spacing.x, 23);
 
-    ImGui::TextUnformatted("Filtr");
+    ImGui::TextUnformatted(ICON_FA_MAGNIFYING_GLASS " Filtr");
     ImGui::SameLine();
-    ImGui::SetNextItemWidth(ImGui::GetWindowSize().x - (2 * window_padding.x) - item_spacing.x - ImGui::CalcTextSize("Filtr").x);
+    ImGui::SetNextItemWidth(ImGui::GetWindowSize().x - (2 * window_padding.x) - item_spacing.x - ImGui::CalcTextSize(ICON_FA_MAGNIFYING_GLASS " Filtr").x);
     ImGui::InputText("##Filtr", filter_buffer, 500);
 
-    ImGui::TextUnformatted("od");
+    ImGui::TextUnformatted(ICON_FA_CALENDAR_DAYS " od");
     ImGui::SameLine();
-    ImGui::SetNextItemWidth(button_size.x - ImGui::CalcTextSize("od").x);
+    ImGui::SetNextItemWidth(button_size.x - ImGui::CalcTextSize(ICON_FA_CALENDAR_DAYS " od").x);
     ImGui::InputText("##datetimi_min", datetime_min_buffer, 18 * 2, ImGuiInputTextFlags_CallbackEdit, MaskedInputCallback, &datetime_min_length);
 
     ImGui::SameLine();
@@ -71,28 +72,51 @@ void MainPanel::MainView() {
     ImGui::SameLine();
     ImGui::SetNextItemWidth(button_size.x - ImGui::CalcTextSize("do").x);
     ImGui::InputText("##datetimi_max", datetime_max_buffer, 18 * 2, ImGuiInputTextFlags_CallbackEdit, MaskedInputCallback, &datetime_max_length);
+    ImGui::Dummy(ImVec2(0.0f, 20.0f));
 
     ImGui::BeginChild("Przefiltrowane");
     // ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4);
     for (int i = 0; i < 1000; i++) {
       ImGui::PushID(i);
+
+      StyleDelete::Button(ICON_FA_CALENDAR_MINUS);
+      ImGui::SameLine();
+      ImGui::Button(ICON_FA_HAMMER "+ dodaj zadanie");
+      ImGui::SameLine();
+
       ImGui::Text("Dzien #%d", i);
-      for (int j = 0; j < 5; j++) {
+      ImGui::Dummy(ImVec2(0.0f, 3.0f));
+
+      ImGui::Indent(8.0f);
+
+      for (int j = 5; j > 0; j--) {
+        bool important = false;
+        if (important) {
+          ImGui::PushStyleColor(ImGuiCol_FrameBg, StyleImportant::framebg);
+          ImGui::PushStyleColor(ImGuiCol_Button, StyleImportant::framebg);
+        }
+
         ImGui::PushID(j);
         bool bul = false;
         ImGui::Checkbox("##hehe", &bul);
         ImGui::SameLine();
 
-        StyleDelete::Button(ICON_FA_TRASH);
+        StyleDelete::Button(ICON_FA_HAMMER " --");
         ImGui::SameLine();
-
-        ImGui::Button(ICON_FA_SQUARE_PLUS);
+        ImGui::Button(ICON_FA_TRIANGLE_EXCLAMATION "+");
         ImGui::SameLine();
-
+        bool switch_important = ImGui::Button(ICON_FA_THUMBTACK);
+        ImGui::SameLine();
         ImGui::InputText("##zadanie", (char *)"zadanie", 10);
 
+        if (important)
+          ImGui::PopStyleColor(2);
+
         ImGui::BeginTable("Uwagi", 4 /*, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg*/);
-        ImGui::PushStyleColor(ImGuiCol_FrameBg, 0xFF151515);
+        if (important)
+          ImGui::PushStyleColor(ImGuiCol_FrameBg, StyleImportant::dimmed_framebg);
+        else
+          ImGui::PushStyleColor(ImGuiCol_FrameBg, 0xFF151515);
 
         ImGui::TableSetupColumn("col1", ImGuiTableColumnFlags_WidthFixed);
         ImGui::TableSetupColumn("col2", ImGuiTableColumnFlags_WidthFixed);
@@ -100,20 +124,25 @@ void MainPanel::MainView() {
 
         Row rows[] = {{"Igły", "", "Zamki z piasku"}, {"Igły", "Osadnik", "Osad"}, {"", "Rzeka", "Woda jest za zimna na kąpiel"}};
 
+        ImGui::Indent(8.0f);
         for (int k = 0; k < (sizeof(rows) / sizeof(Row)); k++) {
           ImGui::PushID(k);
           ImGui::TableNextRow();
           TableRow::Ui(rows[k]);
           ImGui::PopID();
         }
-
+        ImGui::Unindent(8.0f);
         ImGui::PopStyleColor(1);
         ImGui::EndTable();
 
         ImGui::PopID();
+
+        if (switch_important)
+          important = !important;
       }
       ImGui::PopID();
 
+      ImGui::Unindent(8.0f);
       ImGui::TextUnformatted("Awarie");
 
       ImGui::BeginTable("Awarie", 4 /*, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg*/);
@@ -134,7 +163,8 @@ void MainPanel::MainView() {
 
       ImGui::PopStyleColor(1);
       ImGui::EndTable();
-      ImGui::TextUnformatted("");
+
+      ImGui::Dummy(ImVec2(0.0f, 20.0f));
     }
     // ImGui::PopStyleVar(1);
     ImGui::EndChild();

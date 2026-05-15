@@ -102,6 +102,9 @@ add_library(rlimgui STATIC ${rlimgui_SOURCE_DIR}/rlImGui.cpp)
 target_link_libraries(rlimgui PRIVATE imgui raylib)
 target_include_directories(rlimgui INTERFACE ${rlimgui_SOURCE_DIR})
 
+add_library(yyjson src/yyjson/yyjson.c)
+target_include_directories(yyjson PUBLIC src/yyjson/)
+
 CPMAddPackage(
   NAME zlib
   VERSION 1.3.1.2

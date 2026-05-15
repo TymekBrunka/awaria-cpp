@@ -1,9 +1,12 @@
 #pragma once
 #include <dataclasses.hpp>
+#include <mutex>
+#include <map>
 
 struct CompGlobals {
+  static std::mutex mutex;
   static void *icon_tex;
-  static std::vector<Day> days;
+  static std::map<tm, Day> days;
 };
 
 struct Menu {

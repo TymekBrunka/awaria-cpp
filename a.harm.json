@@ -1,0 +1,41 @@
+{
+  "wersja_formatu": 0,
+  "wpisy": {
+    "2026-05-14": {
+      "zmiana1": [
+        "zadanie 1",
+        {
+          "opis": "zadanie 2",
+          "uwagi": [
+            {
+              "miejscowość": "Igły",
+              "opis": "Zamki z piasku"
+            },
+            {
+              "miejscowość": "Igły",
+              "miejsce": "Osadnik",
+              "opis": "Osad"
+            }
+          ]
+        }
+      ],
+      "zmiana2": [
+
+      ],
+      "awarie": [
+        {
+          "miejscowość": "Igły",
+          "opis": "kują"
+        },
+        {
+          "miejscowość": "Igły",
+          "miejsce": "Osadnik",
+          "opis": "Zamki z piasku"
+        }
+      ]
+    }
+  },
+  "szablony": [
+
+  ]
+}

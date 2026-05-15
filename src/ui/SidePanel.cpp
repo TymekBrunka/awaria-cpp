@@ -1,4 +1,7 @@
 #include <Components_internal.hpp>
+#include <SDL3/SDL_dialog.h>
+
+void loadDataFromFile();
 
 void SidePanel::Ui() {
   if (ImGui::Begin("Entries", NULL, ImGuiWindowFlags_NoMove)) {
@@ -8,9 +11,9 @@ void SidePanel::Ui() {
     ImVec2 item_spacing = ImGui::GetStyle().ItemSpacing;
     ImVec2 button_size = ImVec2(ImGui::GetWindowSize().x * 0.5f - (0.5 * window_padding.x) - item_spacing.x, 23);
 
-    ImGui::Button(ICON_FA_SQUARE_PLUS " Dodaj", button_size);
+    ImGui::Button(ICON_FA_CALENDAR_PLUS " Dodaj", button_size);
     ImGui::SameLine();
-    ImGui::Button(ICON_FA_SQUARE_MINUS " Usuń", button_size);
+    ImGui::Button(ICON_FA_CALENDAR_MINUS " Usuń", button_size);
 
     // ImGui::TextAligned(0.5, ImGui::GetWindowSize().x - (0.5 * window_padding.x), "Wpisy");
     ImGui::SetCursorPosX((ImGui::GetWindowSize().x - ImGui::CalcTextSize("wpisy").x) / 2.0);

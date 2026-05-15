@@ -1,4 +1,5 @@
 #include "IconsFontAwesome6.h"
+#include "SDL3/SDL_events.h"
 #include "icon.png.hpp"
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -72,6 +73,7 @@ int main(void) {
   style.FontSizeBase = 17.0f;
 
   while (!WindowShouldClose()) {
+    SDL_PumpEvents();
     BeginDrawing();
     ClearBackground(GetColor(0x222222ff));
 

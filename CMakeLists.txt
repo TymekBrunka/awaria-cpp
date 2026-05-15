@@ -20,17 +20,17 @@ add_library(ui STATIC
   src/ui/MainPanel.cpp
 )
 target_include_directories(ui PUBLIC src src/ui)
-target_link_libraries(ui PUBLIC imgui rlimgui raylib)
+target_link_libraries(ui PUBLIC imgui rlimgui raylib SDL3::SDL3-static yyjson)
 
 add_executable(main src/main.cpp)
 target_link_libraries(main
   PRIVATE
   raylib
-  # SDL2::SDL2-static
   # imgui
   rlimgui
   assets
   ui
 
+  SDL3::SDL3-static
   xlsxio_write_STATIC
 )
