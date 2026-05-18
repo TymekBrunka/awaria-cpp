@@ -6,7 +6,7 @@
 struct CompGlobals {
   static std::mutex mutex;
   static void *icon_tex;
-  static std::map<tm, Day> days;
+  static std::map<std::string, Day> days;
 };
 
 struct Menu {

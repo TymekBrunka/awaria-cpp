@@ -1,7 +1,7 @@
 {
   "wersja_formatu": 0,
   "wpisy": {
-    "2026-05-14": {
+    "2026-05-24": {
       "zmiana1": [
         "zadanie 1",
         {
@@ -13,7 +13,7 @@
             },
             {
               "miejscowość": "Igły",
-              "miejsce": "Osadnik",
+              "objekt": "Osadnik",
               "opis": "Osad"
             }
           ]
@@ -29,7 +29,7 @@
         },
         {
           "miejscowość": "Igły",
-          "miejsce": "Osadnik",
+          "objekt": "Osadnik",
           "opis": "Zamki z piasku"
         }
       ]

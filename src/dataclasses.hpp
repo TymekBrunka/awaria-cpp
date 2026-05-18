@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <ctime>
 #include <cstdint>
 
 typedef std::string City;
@@ -17,8 +16,8 @@ typedef Row Notice;
 typedef Row Malfunction;
 
 struct Task {
-  bool finished;
-  bool important;
+  bool finished = false;
+  bool important = false;
   std::vector<Notice> notices;
   std::string description;
 };
@@ -29,6 +28,7 @@ struct Shift {
 };
 
 struct Day {
+  // const std::string formated_date;
   Shift shift1;
   Shift shift2;
 };

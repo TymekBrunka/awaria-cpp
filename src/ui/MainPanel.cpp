@@ -76,7 +76,12 @@ void MainPanel::MainView() {
 
     ImGui::BeginChild("Przefiltrowane");
     // ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4);
-    for (int i = 0; i < 1000; i++) {
+
+    // auto day = CompGlobals::days.begin();
+    // for (int i = 0; i < CompGlobals::days.size(); i++) {
+    // for (int i = 0; i < 1000; i++) {
+    int i = 0;
+    for (auto& [date, day] : CompGlobals::days) {
       ImGui::PushID(i);
 
       StyleDelete::Button(ICON_FA_CALENDAR_MINUS);
@@ -84,12 +89,12 @@ void MainPanel::MainView() {
       ImGui::Button(ICON_FA_HAMMER "+ dodaj zadanie");
       ImGui::SameLine();
 
-      ImGui::Text("Dzien #%d", i);
+      ImGui::Text("Dzień %s", date.data());
       ImGui::Dummy(ImVec2(0.0f, 3.0f));
 
       ImGui::Indent(8.0f);
 
-      for (int j = 5; j > 0; j--) {
+      for (int j = day.shift1.tasks.size(); j > 0; j--) {
         bool important = false;
         if (important) {
           ImGui::PushStyleColor(ImGuiCol_FrameBg, StyleImportant::framebg);
@@ -107,7 +112,7 @@ void MainPanel::MainView() {
         ImGui::SameLine();
         bool switch_important = ImGui::Button(ICON_FA_THUMBTACK);
         ImGui::SameLine();
-        ImGui::InputText("##zadanie", (char *)"zadanie", 10);
+        ImGui::InputText("##zadanie", day.shift1.tasks[j].description.data(), 10);
 
         if (important)
           ImGui::PopStyleColor(2);
@@ -165,6 +170,7 @@ void MainPanel::MainView() {
       ImGui::EndTable();
 
       ImGui::Dummy(ImVec2(0.0f, 20.0f));
+      ++i;
     }
     // ImGui::PopStyleVar(1);
     ImGui::EndChild();

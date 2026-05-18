@@ -6,6 +6,7 @@
 #include "raylib.h"
 #include "rlImGui.h"
 #include <iostream>
+#include <mutex>
 
 #include <Style.hpp>
 #include <Components.hpp>
@@ -112,6 +113,7 @@ int main(void) {
     // Submit dockspace
     ImGui::DockSpaceOverViewport(dockspace_id, viewport, ImGuiDockNodeFlags_PassthruCentralNode);
 
+    std::lock_guard<std::mutex> guard(CompGlobals::mutex);
     ImGui::SetNextWindowClass(&window_class_horizontal);
     Menu::Ui();
 
