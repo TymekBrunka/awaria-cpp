@@ -1,10 +1,14 @@
 #pragma once
+#include <chrono>
 #include <dataclasses.hpp>
-#include <mutex>
 #include <map>
+#include <mutex>
 
 struct CompGlobals {
   static std::mutex mutex;
+  static std::string file;
+  static std::string today_formated;
+  static std::chrono::year_month_day today;
   static void *icon_tex;
   static std::map<std::string, Day> days;
 };
@@ -22,5 +26,5 @@ struct MainPanel {
 };
 
 struct TableRow {
-  static void Ui(const Row &row);
+  static bool Ui(Row &row);
 };

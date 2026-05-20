@@ -11,7 +11,9 @@ void SidePanel::Ui() {
     ImVec2 item_spacing = ImGui::GetStyle().ItemSpacing;
     ImVec2 button_size = ImVec2(ImGui::GetWindowSize().x * 0.5f - (0.5 * window_padding.x) - item_spacing.x, 23);
 
-    ImGui::Button(ICON_FA_CALENDAR_PLUS " Dodaj", button_size);
+    if (ImGui::Button(ICON_FA_CALENDAR_PLUS " Dodaj", button_size)) {
+      CompGlobals::days[CompGlobals::today_formated];
+    }
     ImGui::SameLine();
     ImGui::Button(ICON_FA_CALENDAR_MINUS " Usuń", button_size);
 
@@ -20,15 +22,20 @@ void SidePanel::Ui() {
     ImGui::TextUnformatted("wpisy");
 
     ImGui::BeginChild("Wpisy");
-    for (int i = 0; i < 1000; i++) {
+    int i = 0;
+    for (auto& [date, day] : CompGlobals::days) {
       ImGui::PushID(i);
-      ImGui::Button("2026-12-24", ImVec2(ImGui::GetWindowSize().x - (0.5 * window_padding.x) - 45, 23));
+      ImGui::Button(date.data(), ImVec2(ImGui::GetWindowSize().x - (0.5 * window_padding.x) - 45, 23));
 
       ImGui::SameLine();
-      StyleDelete::PushStyleVars();
-      ImGui::Button(ICON_FA_TRASH);
-      StyleDelete::PopStyleColors();
+      if (StyleDelete::Button(ICON_FA_TRASH)) {
+        auto idx = CompGlobals::days.find(date);
+        CompGlobals::days.erase(idx);
+        ImGui::PopID();
+        break;
+      }
       ImGui::PopID();
+      ++i;
     }
     ImGui::EndChild();
 

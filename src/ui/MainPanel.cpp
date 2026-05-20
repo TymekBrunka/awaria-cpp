@@ -1,8 +1,9 @@
 #include "Components.hpp"
 #include "IconsFontAwesome6.h"
 #include "Style.hpp"
-// #include "imgui.h"
+#include "imgui.h"
 #include <Components_internal.hpp>
+#include <imgui_stdlib.h>
 #include <stdio.h>
 
 static char filter_buffer[500] = {0};
@@ -51,6 +52,85 @@ static int MaskedInputCallback(ImGuiInputTextCallbackData *data) {
   return 0;
 }
 
+static void task_list(Shift &shift) {
+  ImGui::SameLine();
+
+  ImGui::PushStyleColor(ImGuiCol_Button, ImU32(0xff151515));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(0xffCCCCCC));
+  if (ImGui::Button(ICON_FA_HAMMER "+ dodaj zadanie")) {
+    shift.tasks.push_back({});
+  }
+  ImGui::PopStyleColor(2);
+
+  ImGui::Indent(8.0f);
+
+  for (int j = shift.tasks.size() - 1; j >= 0; j--) {
+    bool &important = shift.tasks[j].important;
+    if (important) {
+      ImGui::PushStyleColor(ImGuiCol_FrameBg, StyleImportant::framebg);
+      ImGui::PushStyleColor(ImGuiCol_Button, StyleImportant::framebg);
+    }
+
+    ImGui::PushID(j);
+    ImGui::BeginDisabled(shift.tasks[j].notices.size());
+    ImGui::Checkbox("##hehe", &shift.tasks[j].finished);
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+
+    if (StyleDelete::Button(ICON_FA_HAMMER " --")) {
+      shift.tasks.erase(shift.tasks.begin() + j);
+      ImGui::PopID();
+      if (important)
+        ImGui::PopStyleColor(2);
+      break;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_TRIANGLE_EXCLAMATION "+")) {
+      shift.tasks[j].notices.push_back({});
+    }
+    ImGui::SameLine();
+    bool switch_important = ImGui::Button(ICON_FA_THUMBTACK);
+    ImGui::SameLine();
+    ImGui::InputText("##zadanie", &shift.tasks[j].description);
+
+    if (important)
+      ImGui::PopStyleColor(2);
+
+    ImGui::BeginTable("Uwagi", 4 /*, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg*/);
+    if (important)
+      ImGui::PushStyleColor(ImGuiCol_FrameBg, StyleImportant::dimmed_framebg);
+    else
+      ImGui::PushStyleColor(ImGuiCol_FrameBg, 0xFF151515);
+
+    ImGui::TableSetupColumn("col1", ImGuiTableColumnFlags_WidthFixed);
+    ImGui::TableSetupColumn("col2", ImGuiTableColumnFlags_WidthFixed);
+    ImGui::TableSetupColumn("col3", ImGuiTableColumnFlags_WidthFixed);
+
+    int k = 0;
+    ImGui::Indent(8.0f);
+    for (auto &notice : shift.tasks[j].notices) {
+      ImGui::PushID(k);
+      ImGui::TableNextRow();
+      if (TableRow::Ui(notice)) {
+        shift.tasks[j].notices.erase(shift.tasks[j].notices.begin() + k);
+        ImGui::PopID();
+        break;
+      }
+      ImGui::PopID();
+      ++k;
+    }
+    ImGui::Unindent(8.0f);
+    ImGui::PopStyleColor(1);
+    ImGui::EndTable();
+
+    ImGui::PopID();
+
+    if (switch_important)
+      important = !important;
+  }
+  ImGui::Unindent(8.0f);
+}
+
 void MainPanel::MainView() {
   if (ImGui::Begin("Content", NULL, ImGuiWindowFlags_NoMove)) {
     ImVec2 window_padding = ImGui::GetStyle().WindowPadding;
@@ -81,74 +161,38 @@ void MainPanel::MainView() {
     // for (int i = 0; i < CompGlobals::days.size(); i++) {
     // for (int i = 0; i < 1000; i++) {
     int i = 0;
-    for (auto& [date, day] : CompGlobals::days) {
+    for (auto &[date, day] : CompGlobals::days) {
       ImGui::PushID(i);
 
-      StyleDelete::Button(ICON_FA_CALENDAR_MINUS);
+      if (StyleDelete::Button(ICON_FA_CALENDAR_MINUS)) {
+        auto idx = CompGlobals::days.find(date);
+        CompGlobals::days.erase(idx);
+        ImGui::PopID();
+        break;
+      }
       ImGui::SameLine();
-      ImGui::Button(ICON_FA_HAMMER "+ dodaj zadanie");
-      ImGui::SameLine();
-
       ImGui::Text("Dzień %s", date.data());
       ImGui::Dummy(ImVec2(0.0f, 3.0f));
 
-      ImGui::Indent(8.0f);
-
-      for (int j = day.shift1.tasks.size(); j > 0; j--) {
-        bool important = false;
-        if (important) {
-          ImGui::PushStyleColor(ImGuiCol_FrameBg, StyleImportant::framebg);
-          ImGui::PushStyleColor(ImGuiCol_Button, StyleImportant::framebg);
-        }
-
-        ImGui::PushID(j);
-        bool bul = false;
-        ImGui::Checkbox("##hehe", &bul);
-        ImGui::SameLine();
-
-        StyleDelete::Button(ICON_FA_HAMMER " --");
-        ImGui::SameLine();
-        ImGui::Button(ICON_FA_TRIANGLE_EXCLAMATION "+");
-        ImGui::SameLine();
-        bool switch_important = ImGui::Button(ICON_FA_THUMBTACK);
-        ImGui::SameLine();
-        ImGui::InputText("##zadanie", day.shift1.tasks[j].description.data(), 10);
-
-        if (important)
-          ImGui::PopStyleColor(2);
-
-        ImGui::BeginTable("Uwagi", 4 /*, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg*/);
-        if (important)
-          ImGui::PushStyleColor(ImGuiCol_FrameBg, StyleImportant::dimmed_framebg);
-        else
-          ImGui::PushStyleColor(ImGuiCol_FrameBg, 0xFF151515);
-
-        ImGui::TableSetupColumn("col1", ImGuiTableColumnFlags_WidthFixed);
-        ImGui::TableSetupColumn("col2", ImGuiTableColumnFlags_WidthFixed);
-        ImGui::TableSetupColumn("col3", ImGuiTableColumnFlags_WidthFixed);
-
-        Row rows[] = {{"Igły", "", "Zamki z piasku"}, {"Igły", "Osadnik", "Osad"}, {"", "Rzeka", "Woda jest za zimna na kąpiel"}};
-
-        ImGui::Indent(8.0f);
-        for (int k = 0; k < (sizeof(rows) / sizeof(Row)); k++) {
-          ImGui::PushID(k);
-          ImGui::TableNextRow();
-          TableRow::Ui(rows[k]);
-          ImGui::PopID();
-        }
-        ImGui::Unindent(8.0f);
-        ImGui::PopStyleColor(1);
-        ImGui::EndTable();
-
-        ImGui::PopID();
-
-        if (switch_important)
-          important = !important;
-      }
+      ImGui::PushID(0);
+      ImGui::TextUnformatted("Zmiana 1");
+      task_list(day.shift1);
       ImGui::PopID();
 
-      ImGui::Unindent(8.0f);
+      ImGui::PushID(1);
+      ImGui::TextUnformatted("Zmiana 2");
+      task_list(day.shift2);
+      ImGui::PopID();
+
       ImGui::TextUnformatted("Awarie");
+      ImGui::SameLine();
+
+      ImGui::PushStyleColor(ImGuiCol_Button, ImU32(0xff151515));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(0xffCCCCCC));
+      if (ImGui::Button(ICON_FA_TRIANGLE_EXCLAMATION "+ dodaj awarię")) {
+        day.malfunctions.push_back({});
+      }
+      ImGui::PopStyleColor(2);
 
       ImGui::BeginTable("Awarie", 4 /*, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg*/);
       ImGui::PushStyleColor(ImGuiCol_FrameBg, 0xFF151515);
@@ -157,17 +201,22 @@ void MainPanel::MainView() {
       ImGui::TableSetupColumn("col2", ImGuiTableColumnFlags_WidthFixed);
       ImGui::TableSetupColumn("col3", ImGuiTableColumnFlags_WidthFixed);
 
-      Row rows[] = {{"Igły", "Sitopiastownik", "Zamki z piasku i nie tylko"}, {"Igły", "Osadnik", "Osadzanie się węgla brunatnego"}};
-
-      for (int k = 0; k < (sizeof(rows) / sizeof(Row)); k++) {
+      int k = 0;
+      for (auto &malfunction : day.malfunctions) {
         ImGui::PushID(k);
         ImGui::TableNextRow();
-        TableRow::Ui(rows[k]);
+        if (TableRow::Ui(malfunction)) {
+          day.malfunctions.erase(day.malfunctions.begin() + k);
+          ImGui::PopID();
+          break;
+        }
         ImGui::PopID();
+        ++k;
       }
 
       ImGui::PopStyleColor(1);
       ImGui::EndTable();
+      ImGui::PopID();
 
       ImGui::Dummy(ImVec2(0.0f, 20.0f));
       ++i;

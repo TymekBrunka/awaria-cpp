@@ -2,7 +2,6 @@
 #include "SDL3/SDL_dialog.h"
 #include <Components_internal.hpp>
 #include <SDL3/SDL.h>
-#include <ctime>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -14,6 +13,7 @@
 static const SDL_DialogFileFilter ofd_filters[] = {{"harmonogram (json)", "harm.json;json"}, {"Wszystkie pliki", "*"}};
 
 static void SDLCALL load_data_callback(void *userdata, const char *const *filelist, int filter);
+static void SDLCALL save_data_callback(void *userdata, const char *const *filelist, int filter);
 
 void Menu::Ui() {
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -32,7 +32,9 @@ void Menu::Ui() {
       SDL_ShowOpenFileDialog(load_data_callback, nullptr, nullptr, ofd_filters, 2, NULL, false);
     }
     ImGui::SameLine();
-    ImGui::Button(ICON_FA_DOWNLOAD " Zapisz");
+    if (ImGui::Button(ICON_FA_DOWNLOAD " Zapisz jako")) {
+      SDL_ShowOpenFileDialog(save_data_callback, nullptr, nullptr, ofd_filters, 2, NULL, false);
+    }
     ImGui::PopStyleVar(4);
     ImGui::PopStyleColor(2);
   }
@@ -107,12 +109,12 @@ static int load_shift(Shift &shift, yyjson_val *zmiana, yyjson_doc *doc) {
         assume2(yyjson_is_arr(uwagi), "pole (zadanie)uwagi nie jest listą");
         iter_arr(uwagi, uwaga, uwaga_idx, uwaga_max) {
           assume2(yyjson_is_obj(uwaga), "element w (zadanie)liście uwag nie jest objektem");
-          yyjson_val *opis = yyjson_obj_get(zadanie, "opis");
-          assume2(yyjson_is_str(opis), "pole (uwaga)opis nie jest ciągiem znaków");
+          yyjson_val *opis_ = yyjson_obj_get(uwaga, "opis");
+          assume2(yyjson_is_str(opis_), "pole (uwaga)opis nie jest ciągiem znaków");
 
-          Notice notice{.description = yyjson_get_str(opis)};
-          yyjson_val *miejscowosc = yyjson_obj_get(zadanie, "miejscowość");
-          yyjson_val *objekt = yyjson_obj_get(zadanie, "objekt");
+          Notice notice{.description = yyjson_get_str(opis_)};
+          yyjson_val *miejscowosc = yyjson_obj_get(uwaga, "miejscowość");
+          yyjson_val *objekt = yyjson_obj_get(uwaga, "objekt");
 
           if (miejscowosc) {
             assume2(yyjson_is_str(miejscowosc), "pole (uwaga)miejscowość nie jest ciągiem znaków");
@@ -133,6 +135,7 @@ static int load_shift(Shift &shift, yyjson_val *zmiana, yyjson_doc *doc) {
       assume2(false, "element w (wpis)liście zadań nie jest odpowiedniego typu (wspierane: opis(ciąg znaków), objekt)");
     }
   }
+  return 0;
 }
 
 static void SDLCALL load_data_callback(void *userdata, const char *const *filelist, int filter) {
@@ -150,8 +153,8 @@ static void SDLCALL load_data_callback(void *userdata, const char *const *fileli
     return;
   }
 
-  yyjson_doc *doc = yyjson_read(data.c_str(), data.size(), 0);
-  // assume(doc, "Błąd wczytania pliku ...");
+  yyjson_doc *doc = yyjson_read(data.c_str(), data.size(), YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS);
+  // assume(!doc, "Błąd wczytania pliku ...");
   yyjson_val *root = yyjson_doc_get_root(doc);
 
   yyjson_val *wersja_formatu = yyjson_obj_get(root, "wersja_formatu");
@@ -172,13 +175,46 @@ static void SDLCALL load_data_callback(void *userdata, const char *const *fileli
     assume(yyjson_is_arr(zmiana1), "pole (wpis)zmiana1 nie jest listą");
     if (load_shift(day.shift1, zmiana1, doc)) return;
 
-    yyjson_val *zmiana2 = yyjson_obj_get(wpis, "zmiana1");
+    yyjson_val *zmiana2 = yyjson_obj_get(wpis, "zmiana2");
     assume(yyjson_is_arr(zmiana2), "pole (wpis)zmiana1 nie jest listą");
     if (load_shift(day.shift2, zmiana2, doc)) return;
+
+    yyjson_val *awarie = yyjson_obj_get(wpis);
+    if (awarie) {
+      assume(yyjson_is_arr(awarie), "pole (wpis)awarie nie jest listą");
+    }
 
     days[date] = std::move(day);
   }
   yyjson_doc_free(doc);
   std::lock_guard<std::mutex> guard(CompGlobals::mutex);
   CompGlobals::days = std::move(days);
+  CompGlobals::file = *filelist;
+}
+
+static int save_file(std::string& file) {
+  yyjson_mut_doc *doc = yyjson_mut_doc_new(NULL);
+  yyjson_mut_val *root = yyjson_mut_obj(doc);
+  yyjson_mut_doc_set_root(doc, root);
+  yyjson_mut_obj_add_str(doc, root, "wersja_formatu", "0");
+
+  yyjson_mut_val *wpisy = yyjson_mut_obj(doc);
+
+  std::lock_guard<std::mutex> guard(CompGlobals::mutex);
+  for (auto& [data, wpis] : CompGlobals::days) {
+    yyjson_mut_val *wpis = yyjson_mut_obj(doc);
+  }
+
+  return 0;
+}
+
+static void SDLCALL save_data_callback(void *userdata, const char *const *filelist, int filter) {
+  if (!filelist) {
+    return;
+  } else if (!*filelist) {
+    return;
+  }
+
+  std::string f(*filelist);
+  save_file(f);
 }

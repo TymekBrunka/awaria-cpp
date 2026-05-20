@@ -7,9 +7,11 @@
 #include "rlImGui.h"
 #include <iostream>
 #include <mutex>
+#include <sstream>
+#include <iomanip>
 
-#include <Style.hpp>
 #include <Components.hpp>
+#include <Style.hpp>
 
 // union mychar {
 //   uint32_t _int;
@@ -69,6 +71,13 @@ int main(void) {
   ImFont *font1 = io.Fonts->AddFontFromFileTTF("src/Roboto-Regular.ttf", 17);
   io.Fonts->AddFontFromMemoryCompressedTTF(FA_compressed_data, FA_compressed_size, 16.0f, &fontcfg, icons_ranges);
   // ImFont* icons = io.Fonts->AddFontFromMemoryTTF(iconfont_data, iconfontsize, 16, &fontcfg);
+
+  const std::chrono::time_point now{std::chrono::system_clock::now()};
+  const std::chrono::year_month_day ymd{std::chrono::floor<std::chrono::days>(now)};
+  CompGlobals::today = ymd;
+  std::ostringstream ss;
+  ss << ymd.year() << "-" << std::setw(2) << std::setfill('0') << static_cast<unsigned>(ymd.month()) << "-" << ymd.day();
+  CompGlobals::today_formated = ss.str();
 
   ImGuiStyle &style = ImGui::GetStyle();
   style.FontSizeBase = 17.0f;

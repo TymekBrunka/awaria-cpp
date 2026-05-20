@@ -1,14 +1,19 @@
 #include <Components_internal.hpp>
+#include <imgui_stdlib.h>
 
-void TableRow::Ui(const Row &row) {
+bool TableRow::Ui(Row &row) {
   ImGui::TableSetColumnIndex(0);
-  StyleDelete::Button(ICON_FA_TRASH);
+  bool bul = false;
+  if (StyleDelete::Button(ICON_FA_TRASH)) {
+    bul = true;
+  }
   ImGui::TableSetColumnIndex(1);
   ImGui::SetNextItemWidth(70);
-  ImGui::InputText("##city", (char*)row.city.data(), row.city.capacity());
+  ImGui::InputText("##city", &row.city);
   ImGui::TableSetColumnIndex(2);
   ImGui::SetNextItemWidth(150);
-  ImGui::InputText("##site", (char*)row.site.data(), row.site.capacity());
+  ImGui::InputText("##site", &row.site);
   ImGui::TableSetColumnIndex(3);
-  ImGui::InputText("##description", (char*)row.description.data(), row.description.capacity());
+  ImGui::InputText("##description", &row.description);
+  return bul;
 }

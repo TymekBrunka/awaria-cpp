@@ -85,7 +85,7 @@ CPMAddPackage(
 )
 
 file(GLOB imgui_SRC
-  deps/imgui/*.hpp
+  deps/imgui/*.h
   deps/imgui/*.cpp
 )
 add_library(

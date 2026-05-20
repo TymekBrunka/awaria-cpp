@@ -24,11 +24,11 @@ struct Task {
 
 struct Shift {
   std::vector<Task> tasks;
-  std::vector<Malfunction> malfunctions;
 };
 
 struct Day {
   // const std::string formated_date;
+  std::vector<Malfunction> malfunctions;
   Shift shift1;
   Shift shift2;
 };
