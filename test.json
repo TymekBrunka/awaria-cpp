@@ -1,0 +1,48 @@
+{
+  "wersja_formatu": 0,
+  "wpisy": {
+    "2026-05-21": {
+      "zmiana1": [
+        {
+          "opis": "podlać kwiaty",
+          "ważne": true
+        },
+        "skosić trawę",
+        {
+          "opis": "kupić masło",
+          "uwagi": [
+            {
+              "miejscowość": "Chojnice",
+              "objekt": "Biedronka",
+              "opis": "20zł za sztukę"
+            },
+            {
+              "miejscowość": "",
+              "objekt": "Dom",
+              "opis": "brak portfela przy sobie"
+            }
+          ]
+        },
+        {
+          "opis": "ubić jajka",
+          "wykonane": true,
+          "uwagi": [
+            {
+              "miejscowość": "",
+              "objekt": "Dom",
+              "opis": "może przesadziłem"
+            }
+          ]
+        }
+      ],
+      "zmiana2": [],
+      "awarie": [
+        {
+          "miejscowość": "Ukraina",
+          "objekt": "Czarnobyl",
+          "opis": "Wybuch reaktora"
+        }
+      ]
+    }
+  }
+}

@@ -78,10 +78,11 @@ static void task_list(Shift &shift) {
     ImGui::SameLine();
 
     if (StyleDelete::Button(ICON_FA_HAMMER " --")) {
-      shift.tasks.erase(shift.tasks.begin() + j);
       ImGui::PopID();
-      if (important)
+      if (important) {
         ImGui::PopStyleColor(2);
+      }
+      shift.tasks.erase(shift.tasks.begin() + j);
       break;
     }
     ImGui::SameLine();
@@ -167,6 +168,7 @@ void MainPanel::MainView() {
       if (StyleDelete::Button(ICON_FA_CALENDAR_MINUS)) {
         auto idx = CompGlobals::days.find(date);
         CompGlobals::days.erase(idx);
+        CompGlobals::current_selected_day = "";
         ImGui::PopID();
         break;
       }

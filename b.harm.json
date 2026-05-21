@@ -1,0 +1,64 @@
+{
+  "wersja_formatu": 0,
+  "wpisy": {
+    "2026-05-24": {
+      "zmiana1": [
+        "zadanie 1",
+        {
+          "opis": "zadanie 2",
+          "uwagi": [
+            {
+              "miejscowość": "Igły",
+              "objekt": "",
+              "opis": "Zamki z piasku"
+            },
+            {
+              "miejscowość": "Igły",
+              "objekt": "Osadnik",
+              "opis": "Osad"
+            }
+          ]
+        }
+      ],
+      "zmiana2": [
+        {
+          "opis": "zmanie 1",
+          "uwagi": [
+            {
+              "miejscowość": "fsfsdfd",
+              "objekt": "eee",
+              "opis": "eeeee"
+            },
+            {
+              "miejscowość": "gggg",
+              "objekt": "ddddd",
+              "opis": "coś"
+            }
+          ]
+        },
+        {
+          "opis": "zadanie dwa",
+          "uwagi": [
+            {
+              "miejscowość": "raz",
+              "objekt": "dwa",
+              "opis": "trzy"
+            }
+          ]
+        }
+      ],
+      "awarie": [
+        {
+          "miejscowość": "Igły",
+          "objekt": "",
+          "opis": "kują"
+        },
+        {
+          "miejscowość": "Igły",
+          "objekt": "Osadnik",
+          "opis": "Zamki z piasku"
+        }
+      ]
+    }
+  }
+}

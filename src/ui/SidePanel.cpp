@@ -15,7 +15,13 @@ void SidePanel::Ui() {
       CompGlobals::days[CompGlobals::today_formated];
     }
     ImGui::SameLine();
-    ImGui::Button(ICON_FA_CALENDAR_MINUS " Usuń", button_size);
+    if (ImGui::Button(ICON_FA_CALENDAR_MINUS " Usuń", button_size)) {
+      auto idx = CompGlobals::days.find(CompGlobals::current_selected_day);
+      if (idx != CompGlobals::days.end()) {
+        CompGlobals::days.erase(idx);
+        CompGlobals::current_selected_day = "";
+      }
+    }
 
     // ImGui::TextAligned(0.5, ImGui::GetWindowSize().x - (0.5 * window_padding.x), "Wpisy");
     ImGui::SetCursorPosX((ImGui::GetWindowSize().x - ImGui::CalcTextSize("wpisy").x) / 2.0);
@@ -23,14 +29,25 @@ void SidePanel::Ui() {
 
     ImGui::BeginChild("Wpisy");
     int i = 0;
-    for (auto& [date, day] : CompGlobals::days) {
+    bool is_selected = false;
+    for (auto &[date, day] : CompGlobals::days) {
       ImGui::PushID(i);
-      ImGui::Button(date.data(), ImVec2(ImGui::GetWindowSize().x - (0.5 * window_padding.x) - 45, 23));
+      is_selected = date == CompGlobals::current_selected_day;
+      if (is_selected)
+        ImGui::PushStyleColor(ImGuiCol_Button, StyleImportant::framebg);
+
+      if (ImGui::Button(date.data(), ImVec2(ImGui::GetWindowSize().x - (0.5 * window_padding.x) - 45, 23))) {
+        CompGlobals::current_selected_day = date;
+      }
+
+      if (is_selected)
+        ImGui::PopStyleColor(1);
 
       ImGui::SameLine();
       if (StyleDelete::Button(ICON_FA_TRASH)) {
         auto idx = CompGlobals::days.find(date);
         CompGlobals::days.erase(idx);
+        CompGlobals::current_selected_day = "";
         ImGui::PopID();
         break;
       }
