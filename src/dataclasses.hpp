@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include <chrono>
 
 typedef std::string City;
 typedef std::string Site;
@@ -28,6 +29,7 @@ struct Shift {
 
 struct Day {
   // const std::string formated_date;
+  std::chrono::year_month_day ymd;
   std::vector<Malfunction> malfunctions;
   Shift shift1;
   Shift shift2;

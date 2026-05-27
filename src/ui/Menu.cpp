@@ -5,6 +5,7 @@
 #include <SDL3/SDL.h>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <rlImGui.h>
 #include <sstream>
@@ -15,6 +16,7 @@ static const SDL_DialogFileFilter ofd_filters[] = {{"harmonogram (json)", "harm.
 
 static void SDLCALL load_data_callback(void *userdata, const char *const *filelist, int filter);
 static void SDLCALL save_data_callback(void *userdata, const char *const *filelist, int filter);
+static int save_file(std::string &file);
 
 void Menu::Ui() {
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -35,6 +37,10 @@ void Menu::Ui() {
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_DOWNLOAD " Zapisz jako")) {
       SDL_ShowSaveFileDialog(save_data_callback, nullptr, nullptr, ofd_filters, 2, NULL);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_DOWNLOAD " Zapisz")) {
+      save_file(CompGlobals::file);
     }
     ImGui::PopStyleVar(4);
     ImGui::PopStyleColor(2);
@@ -157,6 +163,7 @@ static void SDLCALL load_data_callback(void *userdata, const char *const *fileli
   std::string data;
   try {
     data = std::move(readFile(*filelist));
+    CompGlobals::file = std::string(*filelist);
   } catch (std::string &str) {
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Błąd otwarcia pliku", str.c_str(), NULL);
     return;
@@ -179,6 +186,20 @@ static void SDLCALL load_data_callback(void *userdata, const char *const *fileli
     yyjson_val *wpis = yyjson_obj_iter_get_val(date_);
     const char *date = yyjson_get_str(date_);
     Day day{};
+
+    std::tm time{};
+    std::istringstream ss(date);
+    ss >> std::get_time(&time, "%Y-%m-%d");
+
+    if (ss.fail()) {
+      yyjson_doc_free(doc);
+      std::stringstream ss;
+      ss << "Błąd odczytu: nie udało się przetworzyć ciągu znaków na datę\n";
+      assume(true, ss.str().c_str());
+    }
+
+    std::chrono::year_month_day ymd(std::chrono::year(time.tm_year + 1900), std::chrono::month(time.tm_mon + 1), std::chrono::day(time.tm_mday));
+    day.ymd = ymd;
 
     yyjson_val *zmiana1 = yyjson_obj_get(wpis, "zmiana1");
     assume(yyjson_is_arr(zmiana1), "pole (wpis)zmiana1 nie jest listą");
@@ -263,7 +284,7 @@ static int save_file(std::string &file) {
 
   yyjson_mut_val *wpisy = yyjson_mut_obj_add_obj(doc, root, "wpisy");
 
-  std::lock_guard<std::mutex> guard(CompGlobals::mutex);
+  // std::lock_guard<std::mutex> guard(CompGlobals::mutex); //for some reason it was deadlocking (but i only use the mutex in 3 places (which are on single thread most of the time))
   for (auto &[date, day] : CompGlobals::days) {
     yyjson_mut_val *wpis = yyjson_mut_obj_add_obj(doc, wpisy, date.c_str());
 

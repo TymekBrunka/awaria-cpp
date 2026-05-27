@@ -5,7 +5,19 @@
       "zmiana1": [
         {
           "opis": "podlać kwiaty",
-          "ważne": true
+          "ważne": true,
+          "uwagi": [
+            {
+              "miejscowość": "",
+              "objekt": "",
+              "opis": "zobaczymy"
+            },
+            {
+              "miejscowość": "",
+              "objekt": "",
+              "opis": "zapisano"
+            }
+          ]
         },
         "skosić trawę",
         {
@@ -41,6 +53,39 @@
           "miejscowość": "Ukraina",
           "objekt": "Czarnobyl",
           "opis": "Wybuch reaktora"
+        }
+      ]
+    },
+    "2026-05-27": {
+      "zmiana1": [
+        "nie wiem",
+        {
+          "opis": "zawieszenie broni",
+          "uwagi": [
+            {
+              "miejscowość": "",
+              "objekt": "",
+              "opis": "hjhjghjhghghjgjhgjhgjhgjhgjhgjhghjgjhgjhgjhg"
+            }
+          ]
+        }
+      ],
+      "zmiana2": [
+        {
+          "opis": "dla mnie jest ważne",
+          "ważne": true
+        }
+      ],
+      "awarie": [
+        {
+          "miejscowość": "Sforne Gacie",
+          "objekt": "Akademia pana Kleksa",
+          "opis": "Coś"
+        },
+        {
+          "miejscowość": "Igły",
+          "objekt": "Sitopiastownik",
+          "opis": "Pęknięcie sita, zatrzymać odpływ wody!"
         }
       ]
     }

@@ -1,4 +1,5 @@
 #include "IconsFontAwesome6.h"
+#include "RobotoRegular.cpp"
 #include "SDL3/SDL_events.h"
 #include "icon.png.hpp"
 #include "imgui.h"
@@ -8,10 +9,14 @@
 #include <iostream>
 #include <mutex>
 #include <sstream>
+#include <cstring>
 #include <iomanip>
 
 #include <Components.hpp>
 #include <Style.hpp>
+
+extern char datetime_min_buffer[12 * 2];
+extern char datetime_max_buffer[12 * 2];
 
 // union mychar {
 //   uint32_t _int;
@@ -68,16 +73,21 @@ int main(void) {
   fontcfg.MergeMode = true;
 
   static const ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
-  ImFont *font1 = io.Fonts->AddFontFromFileTTF("src/Roboto-Regular.ttf", 17);
+  ImFont *font1 = io.Fonts->AddFontFromMemoryCompressedTTF(RobotoRegular_compressed_data, RobotoRegular_compressed_size, 16.0f);
   io.Fonts->AddFontFromMemoryCompressedTTF(FA_compressed_data, FA_compressed_size, 16.0f, &fontcfg, icons_ranges);
   // ImFont* icons = io.Fonts->AddFontFromMemoryTTF(iconfont_data, iconfontsize, 16, &fontcfg);
+  
+  memcpy(datetime_min_buffer, "1970-01-01", 13);
 
   const std::chrono::time_point now{std::chrono::system_clock::now()};
   const std::chrono::year_month_day ymd{std::chrono::floor<std::chrono::days>(now)};
   CompGlobals::today = ymd;
+  CompGlobals::end = ymd;
+  CompGlobals::start = std::chrono::year_month_day(std::chrono::year(1970), std::chrono::month(1), std::chrono::day(1));
   std::ostringstream ss;
   ss << ymd.year() << "-" << std::setw(2) << std::setfill('0') << static_cast<unsigned>(ymd.month()) << "-" << ymd.day();
   CompGlobals::today_formated = ss.str();
+  memcpy(datetime_max_buffer, ss.str().c_str(), 13);
 
   ImGuiStyle &style = ImGui::GetStyle();
   style.FontSizeBase = 17.0f;

@@ -1,5 +1,9 @@
 #include <Components_internal.hpp>
 #include <SDL3/SDL_dialog.h>
+#include <cstring>
+
+extern char datetime_min_buffer[12 * 2];
+extern char datetime_max_buffer[12 * 2];
 
 void loadDataFromFile();
 
@@ -12,7 +16,7 @@ void SidePanel::Ui() {
     ImVec2 button_size = ImVec2(ImGui::GetWindowSize().x * 0.5f - (0.5 * window_padding.x) - item_spacing.x, 23);
 
     if (ImGui::Button(ICON_FA_CALENDAR_PLUS " Dodaj", button_size)) {
-      CompGlobals::days[CompGlobals::today_formated];
+      CompGlobals::days[CompGlobals::today_formated] = {.ymd = CompGlobals::today};
     }
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_CALENDAR_MINUS " Usuń", button_size)) {
@@ -38,6 +42,10 @@ void SidePanel::Ui() {
 
       if (ImGui::Button(date.data(), ImVec2(ImGui::GetWindowSize().x - (0.5 * window_padding.x) - 45, 23))) {
         CompGlobals::current_selected_day = date;
+        CompGlobals::start = day.ymd;
+        CompGlobals::end = day.ymd;
+        memcpy(datetime_min_buffer, date.data(), 13);
+        memcpy(datetime_max_buffer, date.data(), 13);
       }
 
       if (is_selected)

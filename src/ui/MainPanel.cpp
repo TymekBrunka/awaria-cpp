@@ -4,12 +4,16 @@
 #include "imgui.h"
 #include <Components_internal.hpp>
 #include <imgui_stdlib.h>
+#include <iostream>
 #include <stdio.h>
 
-static char filter_buffer[500] = {0};
+char datetime_min_buffer[12 * 2] = {0}; // double size to fit in another detetime string when pasting
+char datetime_max_buffer[12 * 2] = {0}; // double size to fit in another detetime string when pasting
 
-static char datetime_min_buffer[18 * 2] = {0}; // double size to fit in another detetime string when pasting
-static char datetime_max_buffer[18 * 2] = {0}; // double size to fit in another detetime string when pasting
+struct cb_data {
+  int &prev_len;
+  std::chrono::year_month_day &ymd;
+};
 
 static int datetime_min_length = 0;
 static int datetime_max_length = 0;
@@ -19,6 +23,23 @@ static int MaskedInputCallback(ImGuiInputTextCallbackData *data) {
   int dCount = 0;
   int new_len = data->BufTextLen;
 
+  cb_data *cbdata = (cb_data *)data->UserData;
+  std::chrono::year_month_day &ymd = cbdata->ymd;
+
+  if (!new_len) {
+    std::cout << "neuron actiovation\n";
+    if (&ymd == &CompGlobals::start) {
+      std::cout << "start\n";
+      ymd = std::chrono::year_month_day(std::chrono::year(1970), std::chrono::month(01), std::chrono::day(01));
+      memcpy(datetime_min_buffer, "1970-01-01", 13);
+    } else {
+      std::cout << "end\n";
+      ymd = CompGlobals::today;
+      memcpy(datetime_max_buffer, CompGlobals::today_formated.data(), 13);
+    }
+    return 0;
+  }
+
   // 1. Wyciągnij same cyfry z tego, co jest w buforze
   for (int n = 0; n < data->BufTextLen && dCount < 13; n++) {
     if (data->Buf[n] >= '0' && data->Buf[n] <= '9') {
@@ -27,14 +48,14 @@ static int MaskedInputCallback(ImGuiInputTextCallbackData *data) {
   }
 
   // 2. Zbuduj sformatowany ciąg: 0000:00:00 00:00
-  char formatted[18];
-  snprintf(formatted, 17, "%c%c%c%c-%c%c-%c%c %c%c:%c%c", dCount > 0 ? digits[0] : '0', dCount > 1 ? digits[1] : '0', dCount > 2 ? digits[2] : '0', dCount > 3 ? digits[3] : '0', dCount > 4 ? digits[4] : '0', dCount > 5 ? digits[5] : '0', dCount > 6 ? digits[6] : '0', dCount > 7 ? digits[7] : '0', dCount > 8 ? digits[8] : '0', dCount > 9 ? digits[9] : '0', dCount > 10 ? digits[10] : '0', dCount > 11 ? digits[11] : '0');
+  char formatted[14];
+  snprintf(formatted, 13, "%c%c%c%c-%c%c-%c%c", dCount > 0 ? digits[0] : '0', dCount > 1 ? digits[1] : '0', dCount > 2 ? digits[2] : '0', dCount > 3 ? digits[3] : '0', dCount > 4 ? digits[4] : '0', dCount > 5 ? digits[5] : '0', dCount > 6 ? digits[6] : '0', dCount > 7 ? digits[7] : '0');
 
   int cpos = data->CursorPos;
   data->DeleteChars(0, data->BufTextLen);
   data->InsertChars(0, formatted);
 
-  int &prev_length = *(int *&)data->UserData;
+  int &prev_length = cbdata->prev_len;
   int diff = cpos - prev_length;
 
   // if (diff > 0)
@@ -44,11 +65,20 @@ static int MaskedInputCallback(ImGuiInputTextCallbackData *data) {
   //       cpos++;
   //     }
   //   }
-  if ((cpos == 5 || cpos == 7 || cpos == 11 || cpos == 13) && diff > 0)
+  if ((cpos == 5 || cpos == 7) && diff > 0)
     cpos++;
 
   data->CursorPos = cpos;
   prev_length = cpos;
+
+  std::tm time{};
+  std::istringstream ss(data->Buf);
+  ss >> std::get_time(&time, "%Y-%m-%d");
+
+  if (ss.fail())
+    return 0;
+
+  ymd = std::chrono::year_month_day(std::chrono::year(time.tm_year + 1900), std::chrono::month(time.tm_mon + 1), std::chrono::day(time.tm_mday));
   return 0;
 }
 
@@ -138,22 +168,24 @@ void MainPanel::MainView() {
     ImVec2 item_spacing = ImGui::GetStyle().ItemSpacing;
     ImVec2 button_size = ImVec2(ImGui::GetWindowSize().x * 0.5f - (0.5 * window_padding.x) - item_spacing.x - item_spacing.x, 23);
 
-    ImGui::TextUnformatted(ICON_FA_MAGNIFYING_GLASS " Filtr");
-    ImGui::SameLine();
-    ImGui::SetNextItemWidth(ImGui::GetWindowSize().x - (2 * window_padding.x) - item_spacing.x - ImGui::CalcTextSize(ICON_FA_MAGNIFYING_GLASS " Filtr").x);
-    ImGui::InputText("##Filtr", filter_buffer, 500);
+    // ImGui::TextUnformatted(ICON_FA_MAGNIFYING_GLASS " Filtr");
+    // ImGui::SameLine();
+    // ImGui::SetNextItemWidth(ImGui::GetWindowSize().x - (2 * window_padding.x) - item_spacing.x - ImGui::CalcTextSize(ICON_FA_MAGNIFYING_GLASS " Filtr").x);
+    // ImGui::InputText("##Filtr", filter_buffer, 500);
 
     ImGui::TextUnformatted(ICON_FA_CALENDAR_DAYS " od");
     ImGui::SameLine();
     ImGui::SetNextItemWidth(button_size.x - ImGui::CalcTextSize(ICON_FA_CALENDAR_DAYS " od").x);
-    ImGui::InputText("##datetimi_min", datetime_min_buffer, 18 * 2, ImGuiInputTextFlags_CallbackEdit, MaskedInputCallback, &datetime_min_length);
+    cb_data min_{datetime_min_length, CompGlobals::start};
+    ImGui::InputText("##datetimi_min", datetime_min_buffer, 18 * 2, ImGuiInputTextFlags_CallbackEdit, MaskedInputCallback, &min_);
 
     ImGui::SameLine();
     ImGui::TextUnformatted("do");
     ImGui::SameLine();
     ImGui::SetNextItemWidth(button_size.x - ImGui::CalcTextSize("do").x);
-    ImGui::InputText("##datetimi_max", datetime_max_buffer, 18 * 2, ImGuiInputTextFlags_CallbackEdit, MaskedInputCallback, &datetime_max_length);
-    ImGui::Dummy(ImVec2(0.0f, 20.0f));
+    cb_data max_{datetime_max_length, CompGlobals::end};
+    ImGui::InputText("##datetimi_max", datetime_max_buffer, 18 * 2, ImGuiInputTextFlags_CallbackEdit, MaskedInputCallback, &max_);
+    ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
     ImGui::BeginChild("Przefiltrowane");
     // ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4);
@@ -163,6 +195,9 @@ void MainPanel::MainView() {
     // for (int i = 0; i < 1000; i++) {
     int i = 0;
     for (auto &[date, day] : CompGlobals::days) {
+      if (day.ymd < CompGlobals::start || day.ymd > CompGlobals::end)
+        continue;
+
       ImGui::PushID(i);
 
       if (StyleDelete::Button(ICON_FA_CALENDAR_MINUS)) {

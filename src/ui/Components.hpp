@@ -12,6 +12,9 @@ struct CompGlobals {
   static std::string today_formated;
   static std::chrono::year_month_day today;
   static std::map<std::string, Day> days;
+
+  static std::chrono::year_month_day start;
+  static std::chrono::year_month_day end;
 };
 
 struct Menu {
