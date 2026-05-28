@@ -114,5 +114,22 @@
         }
       ]
     }
-  }
+  },
+  "szablony": [
+    {
+      "nazwa": "Poniedziałek",
+      "zmiana1": [
+        "znoszenie jajek",
+        "d"
+      ],
+      "zmiana2": []
+    },
+    {
+      "nazwa": "Wtorek",
+      "zmiana1": [
+        "dworek"
+      ],
+      "zmiana2": []
+    }
+  ]
 }

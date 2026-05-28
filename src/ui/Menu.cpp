@@ -239,10 +239,37 @@ static void SDLCALL load_data_callback(void *userdata, const char *const *fileli
 
     days[date] = std::move(day);
   }
+
+  std::vector<Template> templates;
+
+  yyjson_val *szablony = yyjson_obj_get(root, "szablony");
+  assume(yyjson_is_arr(szablony), "pole szablony nie jest objektem");
+  iter_arr(szablony, szablon, szablon_idx, szablon_max) {
+    assume(yyjson_is_obj(szablon), "element w liście szablonów nie jest objektem");
+    yyjson_val *nazwa = yyjson_obj_get(szablon, "nazwa");
+    assume(yyjson_is_str(nazwa), "pole (szablon)nazwa nie jest ciągiem znaków");
+
+    Template template_{.name = yyjson_get_str(nazwa)};
+
+    yyjson_val *zmiana1 = yyjson_obj_get(szablon, "zmiana1");
+    assume(yyjson_is_arr(zmiana1), "pole (szablon)zmiana1 nie jest listą");
+    if (load_shift(template_.day.shift1, zmiana1, doc))
+      return;
+
+    yyjson_val *zmiana2 = yyjson_obj_get(szablon, "zmiana2");
+    assume(yyjson_is_arr(zmiana2), "pole (szablon)zmiana1 nie jest listą");
+    if (load_shift(template_.day.shift2, zmiana2, doc))
+      return;
+
+    templates.push_back(template_);
+  }
+
   yyjson_doc_free(doc);
   std::lock_guard<std::mutex> guard(CompGlobals::mutex);
   CompGlobals::current_selected_day = "";
+  CompGlobals::current_selected_template = -1;
   CompGlobals::days = std::move(days);
+  CompGlobals::templates = templates;
   CompGlobals::file = *filelist;
 }
 
@@ -301,6 +328,18 @@ static int save_file(std::string &file) {
       yyjson_mut_obj_add_str(doc, awaria, "opis", malfunction.description.c_str());
     }
   }
+
+  yyjson_mut_val *szablony = yyjson_mut_obj_add_arr(doc, root, "szablony");
+  for (auto &template_ : CompGlobals::templates) {
+    yyjson_mut_val *szablon = yyjson_mut_arr_add_obj(doc, szablony);
+    yyjson_mut_obj_add_str(doc, szablon, "nazwa", template_.name.c_str());
+
+    yyjson_mut_val *zmiana1 = yyjson_mut_obj_add_arr(doc, szablon, "zmiana1");
+    yyjson_mut_val *zmiana2 = yyjson_mut_obj_add_arr(doc, szablon, "zmiana2");
+    save_shift(doc, zmiana1, template_.day.shift1);
+    save_shift(doc, zmiana2, template_.day.shift2);
+  }
+
   yyjson_write_err err;
   yyjson_mut_write_file(file.c_str(), doc, YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, &err);
   if (err.code) {
