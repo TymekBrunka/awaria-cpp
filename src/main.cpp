@@ -6,11 +6,11 @@
 #include "imgui_internal.h"
 #include "raylib.h"
 #include "rlImGui.h"
+#include <cstring>
+#include <iomanip>
 #include <iostream>
 #include <mutex>
 #include <sstream>
-#include <cstring>
-#include <iomanip>
 
 #include <Components.hpp>
 #include <Style.hpp>
@@ -76,7 +76,7 @@ int main(void) {
   ImFont *font1 = io.Fonts->AddFontFromMemoryCompressedTTF(RobotoRegular_compressed_data, RobotoRegular_compressed_size, 16.0f);
   io.Fonts->AddFontFromMemoryCompressedTTF(FA_compressed_data, FA_compressed_size, 16.0f, &fontcfg, icons_ranges);
   // ImFont* icons = io.Fonts->AddFontFromMemoryTTF(iconfont_data, iconfontsize, 16, &fontcfg);
-  
+
   memcpy(datetime_min_buffer, "1970-01-01", 13);
 
   const std::chrono::time_point now{std::chrono::system_clock::now()};
@@ -102,8 +102,10 @@ int main(void) {
     ImGui::PushFont(font1);
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(0xff222222)); // ABGR
 
+#ifndef NDEBUG
     ImGui::ShowStyleEditor();
     ImGui::ShowDemoWindow();
+#endif
 
     ImGuiID dockspace_id = ImGui::GetID("My Dockspace");
     ImGuiViewport *viewport = ImGui::GetMainViewport();

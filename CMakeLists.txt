@@ -4,6 +4,10 @@ set (CMAKE_CXX_STANDARD 20)
 
 include(deps/ext.cmake)
 
+if (CMAKE_SYSTEM_NAME MATCHES "Windows")
+  list(APPEND CMAKE_CXX_FLAGS "-Wl,-subsystem,windows")
+endif()
+
 add_library(assets STATIC src/static.cpp)
 target_include_directories(assets PRIVATE src)
 

@@ -88,6 +88,31 @@
           "opis": "Pęknięcie sita, zatrzymać odpływ wody!"
         }
       ]
+    },
+    "2026-05-28": {
+      "zmiana1": [
+        "hej"
+      ],
+      "zmiana2": [
+        {
+          "opis": "ty",
+          "ważne": true,
+          "uwagi": [
+            {
+              "miejscowość": "On",
+              "objekt": "",
+              "opis": "ja?"
+            }
+          ]
+        }
+      ],
+      "awarie": [
+        {
+          "miejscowość": "Igły",
+          "objekt": "Dzwon",
+          "opis": "?"
+        }
+      ]
     }
   }
 }

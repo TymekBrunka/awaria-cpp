@@ -27,18 +27,23 @@ static int MaskedInputCallback(ImGuiInputTextCallbackData *data) {
   std::chrono::year_month_day &ymd = cbdata->ymd;
 
   if (!new_len) {
-    std::cout << "neuron actiovation\n";
     if (&ymd == &CompGlobals::start) {
-      std::cout << "start\n";
       ymd = std::chrono::year_month_day(std::chrono::year(1970), std::chrono::month(01), std::chrono::day(01));
       memcpy(datetime_min_buffer, "1970-01-01", 13);
+      data->DeleteChars(0, data->BufTextLen);
+      data->InsertChars(0, datetime_min_buffer);
+      data->CursorPos = 0;
     } else {
-      std::cout << "end\n";
       ymd = CompGlobals::today;
       memcpy(datetime_max_buffer, CompGlobals::today_formated.data(), 13);
+      data->DeleteChars(0, data->BufTextLen);
+      data->InsertChars(0, datetime_max_buffer);
+      data->CursorPos = 0;
     }
     return 0;
   }
+
+  std::cout << "gex\n";
 
   // 1. Wyciągnij same cyfry z tego, co jest w buforze
   for (int n = 0; n < data->BufTextLen && dCount < 13; n++) {
