@@ -4,7 +4,7 @@ set (CMAKE_CXX_STANDARD 20)
 
 include(deps/ext.cmake)
 
-if (CMAKE_SYSTEM_NAME MATCHES "Windows")
+if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Release")
   list(APPEND CMAKE_CXX_FLAGS "-Wl,-subsystem,windows")
 endif()
 

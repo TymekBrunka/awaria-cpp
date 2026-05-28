@@ -34,3 +34,8 @@ struct Day {
   Shift shift1;
   Shift shift2;
 };
+
+struct Template {
+  std::string name;
+  Day day;
+};
