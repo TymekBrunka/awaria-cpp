@@ -36,7 +36,7 @@ target_link_libraries(main
   ui
 
   SDL3::SDL3-static
-  xlsxio_write_STATIC
+  # xlsxio_write_STATIC
 )
 
 # if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")

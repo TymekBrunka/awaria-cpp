@@ -1,12 +1,15 @@
 #include <Components_internal.hpp>
 #include <SDL3/SDL_dialog.h>
+#include <SDL3/SDL.h>
 #include <cstring>
 #include <imgui_stdlib.h>
+#include <iostream>
 
 extern char datetime_min_buffer[12 * 2];
 extern char datetime_max_buffer[12 * 2];
 
 static std::string template_name;
+static int item_selected_idx = -1;
 
 void loadDataFromFile();
 
@@ -38,6 +41,36 @@ void SidePanel::Ui() {
             CompGlobals::days.erase(idx);
             CompGlobals::current_selected_day = "";
           }
+        }
+
+        // const char *combo_preview_value = item_selected_idx != -1 ? CompGlobals::templates[item_selected_idx].name.c_str() : "(szablon)";
+        const char *combo_preview_value = "(szablon)";
+        if (ImGui::BeginCombo("##wybor_szablonu", combo_preview_value)) {
+          static ImGuiTextFilter filter;
+          if (ImGui::IsWindowAppearing()) {
+            ImGui::SetKeyboardFocusHere();
+            filter.Clear();
+          }
+          // ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_F);
+          filter.Draw("##Filter", -FLT_MIN);
+
+          ImGui::Selectable("(szablon)", true);
+
+          int n = 0;
+          for (auto &szablon : CompGlobals::templates) {
+            if (filter.PassFilter(szablon.name.c_str()))
+              if (ImGui::Selectable(szablon.name.c_str(), false)) {
+                auto idx = CompGlobals::days.find(CompGlobals::today_formated);
+                if (idx != CompGlobals::days.end()) {
+                  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "", "Obecny dzień już jest na liście wpisów", NULL);
+                  std::cout << "Obecny dzień już jest na liście wpisów\n";
+                } else {
+                  CompGlobals::days[CompGlobals::today_formated] = CompGlobals::templates[n].day;
+                }
+              }
+            n++;
+          }
+          ImGui::EndCombo();
         }
 
         // ImGui::TextAligned(0.5, ImGui::GetWindowSize().x - (0.5 * window_padding.x), "Wpisy");
@@ -105,7 +138,7 @@ void SidePanel::Ui() {
 
         ImGui::BeginChild("Szablony");
         int i = 0;
-        for (auto& szablon : CompGlobals::templates) {
+        for (auto &szablon : CompGlobals::templates) {
           ImGui::PushID(i);
 
           bool is_selected = i == CompGlobals::current_selected_template;

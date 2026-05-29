@@ -91,7 +91,16 @@
     },
     "2026-05-28": {
       "zmiana1": [
-        "hej"
+        {
+          "opis": "hej",
+          "uwagi": [
+            {
+              "miejscowość": "",
+              "objekt": "",
+              "opis": ""
+            }
+          ]
+        }
       ],
       "zmiana2": [
         {
@@ -113,6 +122,21 @@
           "opis": "?"
         }
       ]
+    },
+    "2026-05-29": {
+      "zmiana1": [
+        "znoszenie jajek",
+        "d",
+        ""
+      ],
+      "zmiana2": [
+        {
+          "opis": "",
+          "ważne": true
+        },
+        ":)"
+      ],
+      "awarie": []
     }
   },
   "szablony": [
@@ -120,9 +144,16 @@
       "nazwa": "Poniedziałek",
       "zmiana1": [
         "znoszenie jajek",
-        "d"
+        "d",
+        ""
       ],
-      "zmiana2": []
+      "zmiana2": [
+        {
+          "opis": "",
+          "ważne": true
+        },
+        ":)"
+      ]
     },
     {
       "nazwa": "Wtorek",

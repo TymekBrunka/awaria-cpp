@@ -1,6 +1,7 @@
 #include "Components.hpp"
 #include "SDL3/SDL_dialog.h"
 #include "dataclasses.hpp"
+#include "imgui.h"
 #include <Components_internal.hpp>
 #include <SDL3/SDL.h>
 #include <filesystem>
@@ -41,6 +42,26 @@ void Menu::Ui() {
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_DOWNLOAD " Zapisz")) {
       save_file(CompGlobals::file);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_INFO " o programie")) {
+      ImGui::OpenPopup("about");
+    }
+    if (ImGui::BeginPopup("about")) {
+      ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2) - 20);
+      rlImGuiImageSize((const Texture *)CompGlobals::icon_tex, 40, 40);
+      ImGui::TextUnformatted("Awaria wersja 0.9");
+      ImGui::TextUnformatted("");
+      ImGui::TextUnformatted("Awaria to harmonogram z opcjami dodawania uwag co do możliwości wykonania zadania");
+      ImGui::TextUnformatted("oraz dodawania awarii, które wystąpiły w następującym dniu");
+      ImGui::TextUnformatted("Autor: Tymek Brunka");
+      ImGui::TextUnformatted("");
+      ImGui::TextUnformatted("Wykorzystane technologie:");
+      ImGui::TextUnformatted("- Raylib (od raysan5 na githubie)");
+      ImGui::TextUnformatted("- Dear ImGui (od ocornut na githubie)");
+      ImGui::TextUnformatted("- rlImGui (z raylib-extras na githubie)");
+      ImGui::TextUnformatted("- SDL(3) (z libsdl-org na githubie)");
+      ImGui::EndPopup();
     }
     ImGui::PopStyleVar(4);
     ImGui::PopStyleColor(2);
@@ -249,7 +270,7 @@ static void SDLCALL load_data_callback(void *userdata, const char *const *fileli
     yyjson_val *nazwa = yyjson_obj_get(szablon, "nazwa");
     assume(yyjson_is_str(nazwa), "pole (szablon)nazwa nie jest ciągiem znaków");
 
-    Template template_{.name = yyjson_get_str(nazwa)};
+    Template template_{.name = yyjson_get_str(nazwa), .day = {.ymd = CompGlobals::today}};
 
     yyjson_val *zmiana1 = yyjson_obj_get(szablon, "zmiana1");
     assume(yyjson_is_arr(zmiana1), "pole (szablon)zmiana1 nie jest listą");
@@ -280,9 +301,9 @@ static int save_shift(yyjson_mut_doc *doc, yyjson_mut_val *zmiana1, Shift &shift
     } else {
       yyjson_mut_val *zadanie = yyjson_mut_arr_add_obj(doc, zmiana1);
 
-      if (!task.description.empty()) {
-        yyjson_mut_obj_add_str(doc, zadanie, "opis", task.description.c_str());
-      }
+      // if (!task.description.empty()) {
+      yyjson_mut_obj_add_str(doc, zadanie, "opis", task.description.c_str());
+      // }
       if (task.important) {
         yyjson_mut_obj_add_bool(doc, zadanie, "ważne", true);
       }

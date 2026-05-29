@@ -165,6 +165,46 @@ static void task_list(Shift &shift) {
   ImGui::Unindent(8.0f);
 }
 
+void template_task_list(Shift &shift) {
+  ImGui::SameLine();
+  ImGui::PushStyleColor(ImGuiCol_Button, ImU32(0xff151515));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(0xffCCCCCC));
+  if (ImGui::Button(ICON_FA_HAMMER "+ dodaj zadanie")) {
+    shift.tasks.push_back({});
+  }
+  ImGui::PopStyleColor(2);
+
+  for (int j = shift.tasks.size() - 1; j >= 0; j--) {
+    ImGui::PushID(j);
+
+    bool &important = shift.tasks[j].important;
+    if (important) {
+      ImGui::PushStyleColor(ImGuiCol_FrameBg, StyleImportant::framebg);
+      ImGui::PushStyleColor(ImGuiCol_Button, StyleImportant::framebg);
+    }
+    if (StyleDelete::Button(ICON_FA_HAMMER " --")) {
+      ImGui::PopID();
+      if (important) {
+        ImGui::PopStyleColor(2);
+      }
+      shift.tasks.erase(shift.tasks.begin() + j);
+      break;
+    }
+    ImGui::SameLine();
+    bool switch_important = ImGui::Button(ICON_FA_THUMBTACK);
+    ImGui::SameLine();
+    ImGui::InputText("##zadanie", (std::string *)&shift.tasks[j].description);
+
+    if (important)
+      ImGui::PopStyleColor(2);
+
+    if (switch_important)
+      important = !important;
+
+    ImGui::PopID();
+  }
+}
+
 void MainPanel::MainView() {
   if (CompGlobals::selected_tab == tab::DAYS) {
     if (ImGui::Begin("Content", NULL, ImGuiWindowFlags_NoMove)) {
@@ -290,30 +330,13 @@ void MainPanel::MainView() {
           ImGui::Dummy(ImVec2(0.0f, 3.0f));
 
           ImGui::PushID(0);
-
           ImGui::TextUnformatted("Zmiana 1");
-          ImGui::SameLine();
-          ImGui::PushStyleColor(ImGuiCol_Button, ImU32(0xff151515));
-          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(0xffCCCCCC));
-          if (ImGui::Button(ICON_FA_HAMMER "+ dodaj zadanie")) {
-            szablon.day.shift1.tasks.push_back({});
-          }
-          ImGui::PopStyleColor(2);
+          template_task_list(szablon.day.shift1);
+          ImGui::PopID();
 
-          int j = 0;
-          for (auto &task : szablon.day.shift1.tasks) {
-            ImGui::PushID(j);
-
-            StyleDelete::Button(ICON_FA_HAMMER " --");
-            ImGui::SameLine();
-            bool switch_important = ImGui::Button(ICON_FA_THUMBTACK);
-            ImGui::SameLine();
-            ImGui::InputText("##zadanie", (std::string *)&task.description);
-
-            ImGui::PopID();
-            ++j;
-          }
-
+          ImGui::PushID(1);
+          ImGui::TextUnformatted("Zmiana 2");
+          template_task_list(szablon.day.shift2);
           ImGui::PopID();
 
           ImGui::PopID();
