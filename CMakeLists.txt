@@ -5,7 +5,8 @@ set (CMAKE_CXX_STANDARD 20)
 include(deps/ext.cmake)
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Release")
-  list(APPEND CMAKE_CXX_FLAGS "-Wl,-subsystem,windows")
+  # bc of windows using different main
+  set(APPEND CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS},-Wl,-subsystem,windows")
 endif()
 
 add_library(assets STATIC src/static.cpp)
@@ -38,6 +39,11 @@ target_link_libraries(main
   SDL3::SDL3-static
   # xlsxio_write_STATIC
 )
+
+if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Release")
+  target_compile_options(main PRIVATE -static)
+  target_link_options(main PRIVATE -static)
+endif()
 
 # if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 #   target_compile_options(main PRIVATE -fsanitize=address)

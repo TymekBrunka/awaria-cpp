@@ -50,6 +50,7 @@ void Menu::Ui() {
     if (ImGui::BeginPopup("about")) {
       ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2) - 20);
       rlImGuiImageSize((const Texture *)CompGlobals::icon_tex, 40, 40);
+      ImGui::SetCursorPosX((ImGui::GetWindowSize().x - ImGui::CalcTextSize("Awaria wersja 0.9").x) / 2);
       ImGui::TextUnformatted("Awaria wersja 0.9");
       ImGui::TextUnformatted("");
       ImGui::TextUnformatted("Awaria to harmonogram z opcjami dodawania uwag co do możliwości wykonania zadania");
@@ -61,6 +62,7 @@ void Menu::Ui() {
       ImGui::TextUnformatted("- Dear ImGui (od ocornut na githubie)");
       ImGui::TextUnformatted("- rlImGui (z raylib-extras na githubie)");
       ImGui::TextUnformatted("- SDL(3) (z libsdl-org na githubie)");
+      ImGui::TextUnformatted("- yyjson (od ibireme na githubie)");
       ImGui::EndPopup();
     }
     ImGui::PopStyleVar(4);
