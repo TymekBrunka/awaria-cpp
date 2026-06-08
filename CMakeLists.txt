@@ -6,7 +6,10 @@ include(deps/ext.cmake)
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Release")
   # bc of windows using different main
-  set(APPEND CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS},-Wl,-subsystem,windows")
+  if (DEFINED CMAKE_CXX_FLAGS AND NOT CMAKE_CXX_FLAGS STREQUAL "")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS},")
+  endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}-Wl,-subsystem,windows")
 endif()
 
 add_library(assets STATIC src/static.cpp)
@@ -27,7 +30,12 @@ add_library(ui STATIC
 target_include_directories(ui PUBLIC src src/ui)
 target_link_libraries(ui PUBLIC imgui rlimgui raylib SDL3::SDL3-static yyjson)
 
+if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND CMAKE_BUILD_TYPE STREQUAL "Release")
+  add_executable(main WIN32 src/main.cpp)
+else()
 add_executable(main src/main.cpp)
+endif()
+
 target_link_libraries(main
   PRIVATE
   raylib
